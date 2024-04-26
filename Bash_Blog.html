@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BASH </title>
+  <style>
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 20px;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    header {
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2 {
+      color: #333;
+    }
+    h2 {
+      margin-top: 30px;
+    }
+    p {
+      margin-bottom: 20px;
+    }
+    ul {
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+    }
+    nav {
+      background-color: #333;
+      color: #fff;
+      padding: 10px 0;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li {
+      display: inline;
+      margin-right: 20px;
+    }
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav ul li a:hover {
+      color: #A9A9A9;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>My First Bash Script</h1>
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Blog.html">Blog</a></li>
+      <li><a href="about.html">About Me</a></li>
+      <li><a href="Holden_Weber_Resume.html">Resume</a></li>
+    </ul>
+  </nav>
+  <main>
+      <section id="intro">
+          <h2>Introduction:</h2>
+          <p>Nowadays IT business environments are fast-paced to help processes of repetitive tasks go faster lots of businesses are starting to utilize scripts to automate these tasks. A common task for businesses is uploading files to Azure Storage solutions. Uploading files manually to Azure Storage can be time-consuming and error-prone. The need for an automated solution led to me developing a Bash script that leverages the power of the Azure CLI. In the following blog post, I will explain my process for making such a script to automate this task as well as how the script works.</p>
+      </section>
+
+      <section id="script">
+          <h2>The Script:</h2>
+          <h3>upload_script.sh</h3>
+          <p>The <code>upload_script.sh</code> Bash script acts as a bridge between your local environment and Azure Storage. The core key components and functionalities that make it work are:</p>
+
+          <section id="authentication">
+              <h4>Authentication:</h4>
+              <p>The script has a simple authentication process by installing the Azure CLI and authenticating users via device code authentication.</p>
+              <!-- Code snippet for authentication -->
+              <code>
+                  <!-- Your code snippet for authentication -->
+              </code>
+              <p>(Displays login information and lets you know that you're logged in)</p>
+          </section>
+
+          <section id="region">
+              <h4>Region Selection and Resource Group Handling:</h4>
+              <p>Users are prompted to choose a region from a list of recommendations. The script then checks for the existence of a specified resource group and dynamically creates a new one if needed.</p>
+          </section>
+
+          <section id="storage">
+              <h4>Storage Account and Container Handling:</h4>
+              <p>Flexibility is a key feature of the script. It provides options to create new storage accounts and containers or use existing ones. Name uniqueness is ensured, enhancing user experience.</p>
+          </section>
+
+          <section id="file">
+              <h4>File Handling:</h4>
+              <p>The heart of the script lies in its ability to handle files. Users can upload a single file using the <code>-s</code> option or multiple files using the <code>-m</code> option. The script checks for existing files, offers options for overwriting, skipping, or renaming, and generates shareable links (SAS tokens) for the uploaded files.</p>
+          </section>
+      </section>
+  </main>
+
+  <footer>
+    <p><a href="https://github.com/ipconfig2/CloudUploader-CLI"</a>Link to Bash Script</p>
+      <p>Author: Holden Weber</p>
+  </footer>
+  </body>
+  </html>

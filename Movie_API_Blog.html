@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BASH </title>
+  <style>
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 20px;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    header {
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2 {
+      color: #333;
+    }
+    h2 {
+      margin-top: 30px;
+    }
+    p {
+      margin-bottom: 20px;
+    }
+    ul {
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+    }
+    nav {
+      background-color: #333;
+      color: #fff;
+      padding: 10px 0;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li {
+      display: inline;
+      margin-right: 20px;
+    }
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav ul li a:hover {
+      color: #A9A9A9;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>My First Bash Script</h1>
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Blog.html">Blog</a></li>
+      <li><a href="about.html">About Me</a></li>
+      <li><a href="Holden_Weber_Resume.html">Resume</a></li>
+    </ul>
+  </nav>
+  <main>
+    <section>
+        <h1>Introducing Movie Ranker</h1>
+        <p>Looking for a reliable source to explore movies and get quick summaries? Look no further than Movie Ranker, a sleek web application powered by Azure Cosmos DB and the Hugging Face API.</p>
+      <img src="Movie_Ranker.png" alt="Movie Ranker" width="100%">
+    </section>
+
+    <section>
+        <h2>Features</h2>
+        <ul>
+            <li>Movie Listing: Dive into a curated list of movies complete with essential details.</li>
+            <li>Movie Details: Get in-depth information about each movie with just a click.</li>
+            <li>Summary Generation: Instantly generate movie summaries using the cutting-edge Hugging Face API.</li>
+            <li>Dark Theme: Enjoy a stylish dark theme for a visually pleasing experience, day or night.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Getting Started</h2>
+        <ol>
+            <li><strong>Azure Cosmos DB:</strong> Create a Cosmos DB instance named 'Movies' with a container named 'Movies', and populate it with your movie data.</li>
+            <li><strong>Environment Variables:</strong> Configure your Azure Function App with the necessary environment variables, including CosmosDBEndpoint, CosmosDBKey, and HUGGINGFACE_API_KEY.</li>
+            <li><strong>Deployment:</strong> Deploy the provided Azure Function App containing the code.</li>
+            <li><strong>Accessing the Application:</strong> Once deployed, access Movie Ranker through the specified routes.</li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>Usage Made Simple</h2>
+        <p>Using Movie Ranker is simple:</p>
+        <ul>
+            <li><strong>GetMovies:</strong> Head to the /GetMovies route to browse through the movie collection.</li>
+            <li><strong>GenerateSummary:</strong> Click on the "Generate Summary" button for any movie to receive an on-the-fly summary.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>API Routes at Your Fingertips</h2>
+        <p>Utilize Movie Ranker's API routes for seamless integration:</p>
+        <ul>
+            <li><strong>GetMovies Route:</strong> Retrieve the list of movies by accessing the /GetMovies route via the GET method.</li>
+            <li><strong>GenerateSummary Route:</strong> Generate a summary for a specific movie by navigating to the /GenerateSummary route with the movie title as a parameter.</li>
+        </ul>
+    </section>
+
+    <section>
+            <li><strong>Contribute:</strong> Feel free to contribute to the project by opening issues or submitting pull requests. Check out the contribution guidelines for more information.</li>
+        </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Link to Movie Ranker: <a href="https://severless-movies-api.azurewebsites.net/api/GetMovies">Movie Ranker</a></p>
+   <p>Link to Movie Ranker GitHub: <a href="https://github.com/ipconfig2/Serverless-Movies-API">GitHub</a></p>
+    <p>Author: Holden Weber</p>
+  </footer>
+
+  </body>
+  </html>

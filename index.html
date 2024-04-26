@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0; /* Added to remove default body margin */
+      font-family: Arial, sans-serif;
+    }
+
+    #myVideo {
+      position: fixed;
+      right: 0;
+      top: 3%;
+      min-width: 100%;
+      min-height: 100%;
+      z-index: -1;
+      filter: brightness(50%);
+    }
+
+
+    .content {
+      position: relative; /* Added to make z-index work */
+      padding-top: 70px; /* Adjust according to your navigation bar height */
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* Make the content div take the full height of the viewport */
+      z-index: 1; /* Ensure content appears above the overlay */
+    }
+
+    .name {
+      font-size: 66px;
+    }
+
+    .job-title {
+      font-size: 54px;
+      margin-bottom: 50px;
+    }
+
+    nav {
+      background-color: #333;
+      color: #fff;
+      padding: 10px 0;
+      text-align: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 2; /* Set z-index higher than background and overlay */
+    }
+
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav ul li {
+      display: inline;
+      margin-right: 20px;
+    }
+
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    nav ul li a:hover {
+      color: #A9A9A9;
+    }
+  </style>
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Blog.html">Blog</a></li>
+      <li><a href="about.html">About Me</a></li>
+      <li><a href="Holden_Weber_Resume.html">Resume</a></li>
+    </ul>
+  </nav>
+</head>
+<body>
+  <div class="content">
+    <video autoplay muted loop id="myVideo">
+      <source src="WaterfallClip.mp4" type="video/mp4">
+    </video>
+    <div class="name">Holden Weber</div>
+    <div class="job-title">IT Support Specialist</div>
+  </div>
+</body>
+</html>
