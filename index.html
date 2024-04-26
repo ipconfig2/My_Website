@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      margin: 0; /* Added to remove default body margin */
+      margin: 0;
       font-family: Arial, sans-serif;
+      overflow: hidden; /* Hide the scrollbar */
     }
 
     #myVideo {
@@ -21,14 +22,14 @@
 
 
     .content {
-      position: relative; /* Added to make z-index work */
-      padding-top: 70px; /* Adjust according to your navigation bar height */
+      position: relative; 
+      padding-top: 70px;
       color: white;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh; /* Make the content div take the full height of the viewport */
+      height: 100vh; 
       z-index: 1; /* Ensure content appears above the overlay */
     }
 
@@ -37,7 +38,7 @@
     }
 
     .job-title {
-      font-size: 54px;
+      font-size: 34px;
       margin-bottom: 50px;
     }
 
@@ -80,6 +81,7 @@
       <li><a href="Blog.html">Blog</a></li>
       <li><a href="about.html">About Me</a></li>
       <li><a href="Holden_Weber_Resume.html">Resume</a></li>
+      <li><a href="Contact.html">Contact Me</a></li>
     </ul>
   </nav>
 </head>
