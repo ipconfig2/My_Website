@@ -35,21 +35,37 @@
       z-index: 1; /* Ensure content appears above the overlay */
     }
 
+    @media only screen and (max-width: 600px) {
     .name {
-      font-size: 66px;
+      font-size: 40px;
     }
-
     .job-title {
-      font-size: 34px;
-      margin-bottom: 40px;
+      font-size: 24px;
+      margin-bottom: 20px; 
     }
-
-    ad {
-      text-align: center;
-      margin-top: 20px;
-      color: #666;
+    .ad {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 15px;
+        color: white;
+      }
     }
-
+    @media only screen and (min-width: 600px) {
+      .name {
+        font-size: 65px; /* Increase font size on larger screens */
+      }
+      .job-title {
+        font-size: 40px; /* Increase font size on larger screens */
+        margin-bottom: 50px; /* Adjust margin on larger screens */
+      }
+      .ad {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 20px;
+        color: white;
+      }
+    }
+    
     .explore-button {
       margin-top: 20px;
     }
