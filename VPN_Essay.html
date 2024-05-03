@@ -4,87 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VPN Website Project</title>
-  <style>
-    body {
-      font-family: 'Times New Roman', Times, serif;
-      font-size: 20px;
-      line-height: 1.6;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-      color: #333;
-    }
-    header {
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    main {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    h1, h2 {
-      color: #333;
-    }
-    h2 {
-      margin-top: 30px;
-    }
-    p {
-      margin-bottom: 20px;
-    }
-    ul {
-      margin-bottom: 20px;
-      padding-left: 20px;
-    }
-    footer {
-      text-align: center;
-      margin-top: 20px;
-      color: #666;
-    }
-    nav {
-      background-color: #333;
-      color: #fff;
-      padding: 10px 0;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    nav ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-    }
-    nav ul li {
-      display: inline;
-      margin-right: 20px;
-    }
-    nav ul li a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    nav ul li a:hover {
-      color: #A9A9A9;
-    }
-  </style>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="Blog_Post.css">
 </head>
 <body>
+  <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="Holden_Weber_Resume.html">Resume</a>
+  </div>
+
+  <!-- Use any element to open the sidenav -->
+  <span onclick="openNav()">
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+  </div>
+  </span>
   <header>
     <h1>VPN Website Project</h1>
   </header>
-
-  <nav>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="Blog.html">Blog</a></li>
-      <li><a href="about.html">About Me</a></li>
-      <li><a href="Holden_Weber_Resume.html">Resume</a></li>
-    </ul>
-  </nav>
 
   <main>
     <section id="vpn-essay">
@@ -130,5 +72,6 @@
   <footer>
     <p>Author: Holden Weber</p>
   </footer>
+  <script src="myscripts.js"></script>
 </body>
 </html>

@@ -4,70 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blog</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    
-    nav {
-      background-color: #333;
-      color: #fff;
-      padding: 10px 0;
-      text-align: center;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-    }
-
-
-    nav ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    nav ul li {
-      display: inline;
-      margin-right: 20px;
-    }
-
-    nav ul li a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    nav ul li a:hover {
-      color: #A9A9A9;
-    }
-    .content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      color: #333;
-    }
-    section {
-      margin-top: 20px;
-    }
-  </style>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="Blog.css">
+  
 </head>
 <body>
-  <nav>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="Blog.html">Blog</a></li>
-      <li><a href="about.html">About Me</a></li>
-      <li><a href="Holden_Weber_Resume.html">Resume</a></li>
-    </ul>
-  </nav>
+  <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="Holden_Weber_Resume.html">Resume</a>
+  </div>
+
+  <!-- Use any element to open the sidenav -->
+  <span onclick="openNav()">
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+  </div>
+  </span>
   <div class="content">
     <h1>Blog Posts</h1>
     <section>
@@ -85,7 +42,7 @@
       <p1><em>02/25/2024</em></p1>
       <p>A bash-based CLI tool that allows users to quickly upload files to an Azure cloud storage solution, providing a simple and seamless upload experience similar to popular storage services.</p>
     </section>
-  
+    <script src="myscripts.js"></script>
   </div>
 </body>
 </html>

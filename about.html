@@ -4,101 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About Me</title>
-  <style>
-    body {
-      font-family: 'Times New Roman', Times, serif;
-      font-size: 20px;
-      line-height: 2;
-      margin: 0;
-      padding: 20px;
-      background-color: #f4f4f4;
-      color: #333;
-    }
-    header {
-      color: #fff;
-      padding: 20px;
-      text-align: center;\
-      margin-bottom: 20px;
-    }
-    main {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    h1, h2 {
-      color: #333;
-    }
-    h2 {
-      margin-top: 30px;
-    }
-    section {
-      text-align: center;
-    }
-    ul {
-      margin-bottom: 20px;
-    }
-    .author-pic {
-      text-align: center;
-      margin-top: 30px;
-    }
-    .author-pic img {
-      border-radius: 50%;
-      width: 350px;
-      height: 350px;
-    }
-    footer {
-      text-align: center;
-      margin-top: 20px;
-      color: #666;
-    }
-    nav {
-      background-color: #333;
-      color: #fff;
-      padding: 10px 0;
-      text-align: center;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-    }
-
-    nav ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    nav ul li {
-      display: inline;
-      margin-right: 20px;
-    }
-
-    nav ul li a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    nav ul li a:hover {
-      color: #A9A9A9;
-    }
-      </style>
-    </head>
-    <body>
-      <nav>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="Blog.html">Blog</a></li>
-          <li><a href="about.html">About Me</a></li>
-          <li><a href="Holden_Weber_Resume.html">Resume</a></li>
-        </ul>
-      </nav>
-  </style>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="about.css">
 </head>
 <body>
-  
+  <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="Holden_Weber_Resume.html">Resume</a>
+  </div>
 
+  <!-- Use any element to open the sidenav -->
+  <span onclick="openNav()">
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+  </div>
+  </span>
   <main>
     <header>
       <h1>About Me</h1>
@@ -116,5 +41,6 @@
         <p><a href="https://github.com/ipconfig2"</a>GitHub</p>
     </footer>
   </main>
+   <script src="myscripts.js"></script>
 </body>
 </html>
