@@ -39,7 +39,7 @@ ul li {
   position: fixed; /* Stay in place */
   z-index: 2; /* Stay on top */
   top: 0; /* Stay at the top */
-  left: 0;
+  right: 0;
   background-color: #111; /* Black*/
   overflow-x: hidden; /* Disable horizontal scroll */
   padding-top: 60px; /* Place content 60px from the top */
@@ -61,15 +61,6 @@ ul li {
   color: #f1f1f1;
 }
 
-/* Position and style the close button (top right corner) */
-.sidenav .closebtn {
-  position: absolute;
-  top: 0;
-  right: 25px;
-  font-size: 36px;
-  margin-left: 50px;
-}
-
 /* Style page content - use this if you want to push the page content to the right when you open the side navigation */
 .main {
   transition: margin-left .5s;
@@ -85,7 +76,7 @@ ul li {
     display: flex;
     position: absolute;
     top: 1%; /* Position from the top */
-    left: 20px; /* Distance from the left */
+    right: 20px; /* Distance from the left */
     z-index: 2; /* Stay on top */
     flex-direction: column;
     justify-content: space-between;
@@ -120,4 +111,20 @@ ul li {
 
 .hamburger.active .line:nth-child(3) {
     transform: translateY(-8px) rotate(-45deg);
+}
+
+#downloadButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none; /* Round Edges */
+  border-radius: 5px;
+  display: block; /* Ensures the button takes the full width */
+  margin: 0 auto; /* Centers the button horizontally */
+}
+
+
+#downloadButton:hover {
+  background-color: #0056b3;
 }

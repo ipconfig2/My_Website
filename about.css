@@ -33,6 +33,10 @@ section {
 ul {
   margin-bottom: 20px;
 }
+a {
+  color: #009dff;
+  text-decoration: none;
+}
 .author-pic {
   text-align: center;
   margin-top: 30px;
@@ -54,7 +58,7 @@ footer {
   position: fixed; /* Stay in place */
   z-index: 2; /* Stay on top */
   top: 0; /* Stay at the top */
-  left: 0;
+  right: 0;
   background-color: #111; /* Black*/
   overflow-x: hidden; /* Disable horizontal scroll */
   padding-top: 60px; /* Place content 60px from the top */
@@ -76,15 +80,6 @@ footer {
   color: #f1f1f1;
 }
 
-/* Position and style the close button (top right corner) */
-.sidenav .closebtn {
-  position: absolute;
-  top: 0;
-  right: 25px;
-  font-size: 36px;
-  margin-left: 50px;
-}
-
 /* Style page content - use this if you want to push the page content to the right when you open the side navigation */
 .main {
   transition: margin-left .5s;
@@ -100,7 +95,7 @@ footer {
     display: flex;
     position: absolute;
     top: 1%; /* Position from the top */
-    left: 20px; /* Distance from the left */
+    right: 20px; /* Distance from the left */
     z-index: 2; /* Stay on top */
     flex-direction: column;
     justify-content: space-between;
@@ -118,8 +113,6 @@ footer {
     border-radius: 3px; /* Rounded edges */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
 }
-
-
 
 .hamburger:hover .line {
     background-color: #555;
