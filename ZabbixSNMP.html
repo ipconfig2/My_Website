@@ -158,13 +158,13 @@
       <ol>
         <li>Create a Ubuntu Server VM on Proxmox and update it.</li>
         <figure>
-          <img src="imagesSNMP/image20.png" alt="Creating Ubuntu Server VM">
+          <img src="imagesSNMP/image20.png" alt="Creating Ubuntu Server VM" width="100%">
           <figcaption>Creating Ubuntu Server VM</figcaption>
         </figure>
         
         <li>Choose Ubuntu platform, select MySQL as the database, and Apache as the web server.</li>
         <figure>
-          <img src="imagesSNMP/image14.png" alt="Zabbix Setup Selection">
+          <img src="imagesSNMP/image14.png" alt="Zabbix Setup Selection" width="100%">
           <figcaption>Zabbix Setup Selection</figcaption>
         </figure>
 
@@ -174,7 +174,7 @@
 # apt update
         </code></pre>
         <figure>
-          <img src="imagesSNMP/image28.png" alt="Installing Zabbix Repository">
+          <img src="imagesSNMP/image28.png" alt="Installing Zabbix Repository" width="100%">
           <figcaption>Installing Zabbix Repository</figcaption>
         </figure>
 
@@ -191,11 +191,6 @@ mysql&gt; create database zabbix character set utf8mb4 collate utf8mb4_bin;
 mysql&gt; create user zabbix@localhost identified by 'password';
 mysql&gt; grant all privileges on zabbix.* to zabbix@localhost;
 mysql&gt; quit;</code></pre>
-
-        <figure>
-          <img src="imagesSNMP/image12.png" alt="Zabbix Initial Database Creation">
-          <figcaption>Zabbix Initial Database Creation</figcaption>
-        </figure>
       </ol>
     </section>
   </main>
