@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SNMP Project</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>SNMP Project</h1>
+    <p>Holden G. Weber</p>
+    <p>Computer Systems & Network Administration, Thaddeus Stevens College of Technology</p>
+    <p>Course: CNSA-166-AM - Internet Device</p>
+    <p>Instructor: Mr. Headings</p>
+    <p>Date: March 20th, 2024</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Introduction</h2>
+      <p>This paper will explain SNMP, its importance in network management, how it works, and discuss SNMP features in several monitoring products, both commercial and open-source. It also covers the installation of an open-source monitoring tool and security considerations.</p>
+      <p>SNMP (Simple Network Management Protocol) is a protocol for monitoring and managing network devices. It’s essential for network information gathering and management.</p>
+    </section>
+
+    <section>
+      <h2>Understanding SNMP</h2>
+      <p>SNMP operates by placing software agents on devices to monitor them. These agents communicate with the Network Management System (NMS), providing device information and status. The NMS, also known as the SNMP manager, is an interface for privileged users to send commands and receive alerts.</p>
+      <p>SNMP uses the Management Information Base (MIB) to organize device information with Object Identifiers (OIDs). Key SNMP commands include:</p>
+      <ul>
+        <li><strong>SNMP Get:</strong> Requests device status.</li>
+        <li><strong>SNMP GetNext:</strong> Retrieves a range of OIDs.</li>
+        <li><strong>SNMP Get Response:</strong> Responds to SNMP Get or GetNext requests.</li>
+      </ul>
+      <p>Each SNMP command requires a community string, serving as a password for different permissions. The latest SNMP version (v3) includes security algorithms like MD5, SHA, and DES.</p>
+    </section>
+
+    <section>
+      <h2>Comparison</h2>
+
+      <h3>Commercial Monitoring Products</h3>
+      <table>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>SNMP Versions</th>
+          <th>GUI Rating</th>
+          <th>Alert Capabilities</th>
+          <th>Support</th>
+        </tr>
+        <tr>
+          <td>SolarWinds</td>
+          <td>$27 - $50/month</td>
+          <td>Any</td>
+          <td>9/10</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>ManageEngine OP Manager</td>
+          <td>$245 - $11,545/year</td>
+          <td>Any</td>
+          <td>5/10</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>Data Dog</td>
+          <td>Free - $34/month</td>
+          <td>Any</td>
+          <td>10/10</td>
+          <td>Yes</td>
+          <td>Paid support</td>
+        </tr>
+        <tr>
+          <td>Logic Monitor</td>
+          <td>$22/month</td>
+          <td>Any</td>
+          <td>8/10</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>What's Up Gold</td>
+          <td>$2,740 for 25 devices</td>
+          <td>Any</td>
+          <td>8/10</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+      </table>
+
+      <h3>Open-Source Monitoring Projects</h3>
+      <table>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>SNMP Versions</th>
+          <th>GUI Rating</th>
+          <th>Alert Capabilities</th>
+          <th>Support</th>
+        </tr>
+        <tr>
+          <td>LibreNMS</td>
+          <td>Free</td>
+          <td>1 & 3</td>
+          <td>6/10</td>
+          <td>Yes</td>
+          <td>Community support</td>
+        </tr>
+        <tr>
+          <td>Zabbix</td>
+          <td>Free</td>
+          <td>Any</td>
+          <td>10/10</td>
+          <td>Yes</td>
+          <td>Paid support</td>
+        </tr>
+        <tr>
+          <td>Prometheus</td>
+          <td>Free</td>
+          <td>Any</td>
+          <td>9/10</td>
+          <td>Yes</td>
+          <td>Paid support</td>
+        </tr>
+        <tr>
+          <td>Observium</td>
+          <td>Free - $1,400/year</td>
+          <td>Any</td>
+          <td>6/10</td>
+          <td>Yes</td>
+          <td>Paid support</td>
+        </tr>
+        <tr>
+          <td>Nagios</td>
+          <td>$3,000 - $24,000</td>
+          <td>Any</td>
+          <td>4/10</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Installing an Open-Source Monitoring Tool</h2>
+      <p>After research, I selected Zabbix for my home network. I chose SNMP v3 for secure network monitoring.</p>
+      <h3>Installation Steps</h3>
+      <ol>
+        <li>Create a Ubuntu Server VM on Proxmox and update it.</li>
+        <figure>
+          <img src="imagesSNMP/image20.png" alt="Creating Ubuntu Server VM">
+          <figcaption>Creating Ubuntu Server VM</figcaption>
+        </figure>
+        
+        <li>Choose Ubuntu platform, select MySQL as the database, and Apache as the web server.</li>
+        <figure>
+          <img src="imagesSNMP/image14.png" alt="Zabbix Setup Selection">
+          <figcaption>Zabbix Setup Selection</figcaption>
+        </figure>
+
+        <li>Install Zabbix repository:</li>
+        <pre><code># wget https://repo.zabbix.com/zabbix/6.5/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.5-1+ubuntu22.04_all.deb
+# dpkg -i zabbix-release_6.5-1+ubuntu22.04_all.deb
+# apt update
+        </code></pre>
+        <figure>
+          <img src="imagesSNMP/image28.png" alt="Installing Zabbix Repository">
+          <figcaption>Installing Zabbix Repository</figcaption>
+        </figure>
+
+        <li>Install Zabbix server, frontend, and agent:</li>
+        <pre><code>apt install zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent</code></pre>
+
+        <li>Install MySQL server:</li>
+        <pre><code>sudo apt-get install mysql-server
+sudo systemctl start mysql</code></pre>
+
+        <li>Create the initial database:</li>
+        <pre><code>mysql -uroot -p
+mysql&gt; create database zabbix character set utf8mb4 collate utf8mb4_bin;
+mysql&gt; create user zabbix@localhost identified by 'password';
+mysql&gt; grant all privileges on zabbix.* to zabbix@localhost;
+mysql&gt; quit;</code></pre>
+
+        <figure>
+          <img src="imagesSNMP/image12.png" alt="Zabbix Initial Database Creation">
+          <figcaption>Zabbix Initial Database Creation</figcaption>
+        </figure>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>Holden Weber</p>
+  </footer>
+</body>
+</html>
