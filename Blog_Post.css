@@ -124,3 +124,15 @@ footer {
 .hamburger.active .line:nth-child(3) {
     transform: translateY(-8px) rotate(-45deg);
 }
+
+    .pdf-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; 
+    }
+
+    iframe {
+      max-width: 90%; 
+      height: 80vh; 
+    }
