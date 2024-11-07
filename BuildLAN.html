@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>10th Floor Financial Department Telecommunications Room Plan</title>
+  <title>Build LAN Project</title>
   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
   <link rel="stylesheet" href="Blog_Post.css">
 </head>
@@ -24,149 +24,16 @@
   </span>
 
   <header>
-    <h1>10th Floor Financial Department Telecommunications Room Plan</h1>
-    <p>By Holden G. Weber</p>
+    <h1>Build LAN Project</h1>
   </header>
 
   <main>
     <section>
-      <h2>Introduction</h2>
-      <p>The following document's objective is to help provide a comprehensive plan to build a dedicated local area network telecommunication room on the 10th floor and connect it back to the data center on the second floor of the organization's building. Some objectives of this document are to make a secure, dependable, redundant, and fast network. This is important for a financial network as you are dealing with money and a compromise in the network or failure can result in companywide economic loss.</p>
-      <p>This document will contain two solutions for ethernet switching equipment. The two ethernet switching vendor solutions we will compare are Cisco and HP. Also provided in this document is a diagram of the interconnection for the switching stacking solution. We have also included our opinion on which solution is more advantageous for the company. This document also addresses what rack and fiber patch panel we recommend for the network, along with a power plan to ensure power is supplied constantly guaranteeing good uptime. All solutions made meet the requirements set by the IT manager.</p>
-    </section>
-
-    <section>
-      <h2>Requirements</h2>
-      <ul>
-        <li>At least 250 Gb Ethernet ports provided by fully managed, stackable, rack-mount Layer 2 switches to support edge connections. Fifty of these ports must provide PoE.</li>
-        <li>At least 100 Gb Ethernet ports to support data center equipment, provided by managed, stackable, rack-mount Layer 3 switches.</li>
-        <li>At least two 10Gb fiber ports to allow the telecommunication room to connect to the 10Gb fiber switches approximately one hundred yards away in the central data center on floor two.</li>
-        <li>Fiber patch panel and associated fiber patch cables.</li>
-        <li>Three 19-inch, four-post equipment racks and rack-mountable UPS equipment that can provide power protection to all ethernet switches, five 350-watt servers, and still have at least 40% capacity remaining.</li>
-        <li>Specification for AC circuits and receptacles to be provided in the telecommunications room. If any item is a single point of failure, spare parts or additional capacity should be kept on-site.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Cisco Switching Solution</h2>
-      <h3>Edge Switch (Option 1)</h3>
-      <p><strong>Model:</strong> Catalyst 9300L Series<br><strong>Model Number:</strong> C9300L-48P-4G-E</p>
-      <p><strong>Spare Parts:</strong></p>
-      <ul>
-        <li>Fan: FAN-T2: $160</li>
-        <li>Cisco SFP-10G-SR 10GBASE-SR SFP Module: $50 (Quantity: 5)</li>
-      </ul>
-      <p><strong>Stacking Solution:</strong> Stack Wise 320 Stacking Cables included</p>
-      <p><strong>Price:</strong> Individual: $4,000, Total: $20,160</p>
-      <p><strong>Description:</strong> The Cisco Catalyst 9300L Series is a high-performance switch for network settings like data centers, enterprise campuses, and branch offices. It offers scalability, advanced security features, and power efficiency. It provides redundancy with hot-swappable components and stacking capabilities, and supports PoE over all ports.</p>
-
-      <h3>Edge Switch (Option 2)</h3>
-      <p><strong>Model:</strong> Catalyst 9300LM Series<br><strong>Model Number:</strong> C9300LM-48U-4Y</p>
-      <p><strong>Spare Parts:</strong></p>
-      <ul>
-        <li>Fan: FAN-T2: $160</li>
-        <li>Cisco SFP-10G-SR 10GBASE-SR SFP Module: $50 (Quantity: 5)</li>
-      </ul>
-      <p><strong>Stacking Solution:</strong> Stack Wise 320 Stacking Cables included</p>
-      <p><strong>Price:</strong> Individual: $10,000, Total: $50,160</p>
-      <p><strong>Description:</strong> The Cisco Catalyst 9300LM Series is designed for enterprise environments and supports advanced security features, PoE, and high port speeds (1 Gbps over Ethernet, 10 Gbps over fiber).</p>
-
-      <h3>Data Center (Option 1)</h3>
-      <p><strong>Model:</strong> Catalyst 9500X Series<br><strong>Model Number:</strong> C9500X-60L4D</p>
-      <p><strong>Quantity:</strong> 2</p>
-      <p><strong>Stacking Solution:</strong> Stack Wise Virtual</p>
-      <p><strong>Price:</strong> $45,000 each<br><strong>Total Price:</strong> $92,294</p>
-      <p><strong>Spare Parts:</strong></p>
-      <ul>
-        <li>Power Supply: C9K-PWR-650WAC-R/2: $1,514</li>
-        <li>Accessory Kit: C9500-ACC-KIT-19I: $30</li>
-        <li>Cisco SFP-10G-SR 10GBASE-SR SFP Module: $50</li>
-        <li>Fan Tray: C9K-T1-FANTRAY: $750</li>
-      </ul>
-      <p><strong>Description:</strong> The Cisco Catalyst 9500X Series is ideal for data centers, providing Layer 3 routing, MACsec encryption, NBAR, Trust Sec, and speeds up to 400 Gbps over fiber.</p>
-
-      <h3>Data Center (Option 2)</h3>
-      <p><strong>Model:</strong> Catalyst 9500 Series<br><strong>Model Number:</strong> C9500-48Y4C</p>
-      <p><strong>Quantity:</strong> 3</p>
-      <p><strong>Stacking Solution:</strong> Stack Wise Virtual</p>
-      <p><strong>Price:</strong> $16,000 each<br><strong>Total Price:</strong> $50,294</p>
-      <p><strong>Spare Parts:</strong></p>
-      <ul>
-        <li>Power Supply: C9K-PWR-650WAC-R/2: $1,514</li>
-        <li>Accessory Kit: C9500-ACC-KIT-19I: $30</li>
-        <li>Cisco SFP-10G-SR 10GBASE-SR SFP Module: $50</li>
-        <li>Fan Tray: C9K-T1-FANTRAY: $750</li>
-      </ul>
-      <p><strong>Description:</strong> The Cisco Catalyst 9500 Series offers scalable security and routing features, with 25 Gbps copper ports and up to 100 Gbps over fiber.</p>
-    </section>
-
-    <section>
-      <h2>HP Switch Solution</h2>
-      <h3>Edge Switches (Option 1)</h3>
-      <p><strong>Model:</strong> 6300M 48x 1G PoE / 4x SFP56<br><strong>Model Number:</strong> JL661A</p>
-      <p><strong>Spare Parts:</strong></p>
-      <ul>
-        <li>Power Supply: HPE Aruba X372: $1,020</li>
-        <li>SFP+ Transceiver: HPE Aruba: $106</li>
-      </ul>
-      <p><strong>Quantity:</strong> 4</p>
-      <p><strong>Stacking Solution:</strong> Deterministic Stacking Cables included</p>
-      <p><strong>Price:</strong> $6,500 each<br><strong>Total Price:</strong> $27,026</p>
-      <p><strong>Description:</strong> The Aruba 6300M offers Layer 3 routing, PoE, and fiber speeds up to 50 Gbps with high redundancy features for edge environments.</p>
-
-      <h3>Data Center (Option 1)</h3>
-      <p><strong>Model:</strong> 8400 Series<br><strong>Model Number:</strong> JL328A</p>
-      <p><strong>Quantity:</strong> 3</p>
-      <p><strong>Price:</strong> $15,500 each<br><strong>Total Price:</strong> $46,500</p>
-      <p><strong>Spare Parts:</strong></p>
-      <ul>
-        <li>Power Supply: HPE Aruba 8400 Power Supply: $1,800</li>
-        <li>SFP+ Transceiver: HPE Aruba: $106</li>
-      </ul>
-      <p><strong>Description:</strong> The Aruba 8400 Series provides high-capacity routing with 40G/100G fiber, scalable design for high-demand data center networks.</p>
-    </section>
-
-    <section>
-      <h2>Fiber Patch Panel</h2>
-      <p>To ensure proper cable management and support for high-speed data transmission, we recommend the use of fiber patch panels. Each panel will support up to 48 ports, with fiber cable routing and management for both incoming and outgoing fiber cables. We propose the use of:</p>
-      <ul>
-        <li>Fiber patch panels rated for 10G/25G fiber speeds</li>
-        <li>12-core or 24-core fiber optic cables</li>
-        <li>LC to LC patch cables for short-range connections</li>
-        <li>Each panel will be labeled for easy identification of connections</li>
-      </ul>
-      <p>The fiber patch panels will be installed in the dedicated racks, ensuring organized and accessible fiber connections that meet the requirements for both edge and data center switches.</p>
-    </section>
-
-    <section>
-      <h2>Rack Details</h2>
-      <p>We recommend three 19-inch, four-post racks to house the telecommunication equipment and ensure efficient cable management. Each rack will have:</p>
-      <ul>
-        <li>One patch panel for fiber and Ethernet cables.</li>
-        <li>One UPS for power protection and backup.</li>
-        <li>Two or more 1U switches for stacking purposes.</li>
-      </ul>
-      <p>The racks will be placed securely in the telecommunication room with adequate space for airflow and easy access to the equipment. The racks will have cable management systems in place to avoid overcrowding and ensure a tidy setup.</p>
-    </section>
-
-    <section>
-      <h2>Power Solution</h2>
-      <p>The power solution for the telecommunication room must guarantee continuous power to all equipment, including the edge and core switches, servers, and other devices. We recommend the following:</p>
-      <ul>
-        <li>A minimum of 2 UPS systems rated at 5000VA to handle the load of all devices in the room.</li>
-        <li>Each UPS system should have at least 30 minutes of battery backup time to ensure uptime during power outages.</li>
-        <li>The UPS systems should be equipped with monitoring software to notify the IT team of any power interruptions or low battery status.</li>
-        <li>Separate power feeds from different circuits to ensure redundancy in case of a failure of one power source.</li>
-      </ul>
-      <p>Additionally, the power equipment should be housed in the designated racks, with cable management systems to keep power cables organized and out of the way of the network cables.</p>
-    </section>
-
-    <section>
-      <h2>Conclusion</h2>
-      <p>Based on the above evaluations, Cisco’s Catalyst 9300L and 9500X Series provide a more robust solution for our needs in terms of port density, redundancy, and long-term scalability. HP’s 6300M Series can serve well for edge applications, but the Cisco series offers a more versatile and future-proof option for data center deployments.</p>
+      <iframe src="BuildLAN.pdf" width="100%" height="600px">
+      <p>Your browser does not support embedding PDFs. You can <a href="BuildLAN.pdf">download the PDF here</a>.</p>
+    </iframe>
     </section>
   </main>
-
   <footer>
     <p>Author: Holden Weber</p>
   </footer>
