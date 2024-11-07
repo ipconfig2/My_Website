@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automating Windows Installation with Answer Files</title>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="Blog_Post.css">
+</head>
+<body>
+  <div id="mySidenav" class="sidenav">
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="Holden_Weber_Resume.html">Resume</a>
+  </div>
+
+  <span onclick="openNav()">
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </span>
+
+  <header>
+    <h1>Automating Windows Installation with Answer Files</h1>
+  </header>
+  
+  <main>
+    <section>
+      <h2>Introduction to Windows Answer Files</h2>
+      <p>Using answer files allows for an efficient, automated Windows installation, reducing manual steps and ensuring consistency. Here, we’ll look at two scenarios: automating a basic Windows 10 installation and a more complex imaging and cloning setup.</p>
+    </section>
+
+    <section>
+      <h2>Scenario 1: Basic Windows 10 Installation Automation</h2>
+      <p>This scenario involves creating an answer file to automate the standard installation of Windows 10 from a USB drive.</p>
+      <ol>
+        <li><strong>Create the Answer File:</strong> Use <a href="https://www.windowsafg.com/win10x86_x64_uefi.html" target="_blank">Windows Answer File Generator</a> to generate your custom answer file.</li>
+        <li><strong>Prepare a Bootable USB:</strong> Download the Windows 10 ISO file and burn it to a USB drive.</li>
+        <li><strong>Place the Answer File on the Drive:</strong> Add the answer file to the root of the USB drive.</li>
+        <li><strong>Begin Automated Installation:</strong> Boot the target PC from the USB to start the automated installation process.</li>
+      </ol>
+      <img src="images/image8.png" alt="Windows Answer File Setup" width="100%">
+      <p><em>Fig 1: Using Windows Answer File Generator</em></p>
+      
+      <img src="images/image11.png" alt="Windows 10 ISO Creation" width="100%">
+      <p><em>Fig 2: Creating Windows 10 ISO</em></p>
+
+      <img src="images/image7.png" alt="Burning ISO to USB" width="100%">
+      <p><em>Fig 3: Burning ISO to USB Drive</em></p>
+
+      <img src="images/image3.png" alt="Adding Answer File to USB" width="100%">
+      <p><em>Fig 4: Adding Answer File to USB Drive</em></p>
+      
+      <img src="images/image9.png" alt="Automated Windows Installation" width="100%">
+      <p><em>Fig 5: Automated Windows Installation Process</em></p>
+      
+      <img src="images/image1.jpg" alt="Booting Automated Windows Installation" width="100%">
+      <p><em>Fig 6: Booting into Windows for Automated Installation</em></p>
+    </section>
+
+    <section>
+      <h2>Scenario 2: Advanced Imaging and Cloning Automation</h2>
+      <p>This advanced scenario involves using an answer file to automate the imaging and cloning process, along with detailed disk partitioning commands.</p>
+      <ol>
+        <li><strong>Mount the Windows Image:</strong> Prepare the image by mounting it to customize.</li>
+        <li><strong>Place the Answer File:</strong> Copy the answer file into the <code>Windows/Panther</code> folder of the mounted image.</li>
+        <li><strong>Execute Partitioning Commands:</strong> Use commands such as <code>diskpart</code> to set up partitions and format them.
+          <ul>
+            <li>Select disk 0 and clean</li>
+            <li>Create EFI, MSR, and primary partitions</li>
+            <li>Format as <code>fat32</code> or <code>ntfs</code> as required</li>
+            <li>Set up a recovery partition and apply attributes</li>
+          </ul>
+        </li>
+        <li><strong>Apply the Windows Image:</strong> Use <code>Dism</code> commands to apply the Windows image.</li>
+      </ol>
+      <img src="images/image2.png" alt="Mounting Windows Image" width="100%">
+      <p><em>Fig 7: Mounting the Windows Image</em></p>
+
+      <img src="images/image5.png" alt="Unmounting Windows Image" width="100%">
+      <p><em>Fig 8: Unmounting the Windows Image</em></p>
+    </section>
+
+    <section>
+      <h2>Partition Commands Used</h2>
+      <p>Below are the primary commands used to manage disk partitions and prepare the system for imaging:</p>
+      <ol>
+        <li><code>select disk 0</code></li>
+        <li><code>clean</code></li>
+        <li><code>convert gpt</code></li>
+        <li><code>create partition efi size=100</code></li>
+        <li><code>format quick fs=fat32 label="System"</code></li>
+        <li><code>assign letter="S"</code></li>
+        <li><code>create partition msr size=16</code></li>
+        <li><code>create partition primary</code></li>
+        <li><code>shrink minimum=500</code></li>
+        <li><code>format quick fs=ntfs label="Windows"</code></li>
+        <li><code>assign letter="W"</code></li>
+        <li><code>create partition primary</code></li>
+        <li><code>format quick fs=ntfs label="Recovery"</code></li>
+        <li><code>assign letter="R"</code></li>
+        <li><code>set id="de94bba4-06d1-4d40-a16a-bfd50179d6ac"</code></li>
+        <li><code>gpt attributes=0x8000000000000001</code></li>
+      </ol>
+      <img src="images/image6.jpg" alt="Partitioning Disk Setup" width="100%">
+      <p><em>Fig 9: Partitioning Disk Setup</em></p>
+    </section>
+
+    <section>
+      <h2>Applying the Windows Image</h2>
+      <p>After setting up partitions, apply the Windows image using <code>Dism</code> and run system checks.</p>
+      <ul>
+        <li><code>Dism /apply-image /imagefile: "z:\HGW00025.wim" /index:1 /applydir:w:\</code></li>
+        <li><code>sfc /scannow</code> to verify system integrity</li>
+      </ul>
+      <img src="images/image10.jpg" alt="Applying the Windows Image" width="100%">
+      <p><em>Fig 10: Applying the Windows Image</em></p>
+      
+      <img src="images/image4.jpg" alt="System Verification" width="100%">
+      <p><em>Fig 11: System Verification with sfc /scannow</em></p>
+    </section>
+  </main>
+  
+  <footer>
+    <p>Author: Holden Weber</p>
+  </footer>
+</body>
+</html>
