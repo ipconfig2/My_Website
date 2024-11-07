@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10th Floor Financial Department Telecommunications Room Plan</title>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="Blog_Post.css">
+</head>
+<body>
+  <div id="mySidenav" class="sidenav">
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="resume.html">Resume</a>
+  </div>
+
+  <span onclick="openNav()">
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </span>
+
+  <header>
+    <h1>10th Floor Financial Department Telecommunications Room Plan</h1>
+    <p>By Holden G. Weber</p>
+  </header>
+
+  <main>
+    <section>
+      <pre style="white-space: pre-wrap; font-family: inherit;">
+1
+10th Floor Financial Department Telecommunications Room Plan
+Holden G. Weber
+Computer Systems & Network Administration, Thaddues Stevens College of Technology
+CNSA-117-AM: Analysis of TCP
+Mr. Headings
+October 24, 2023
+2
+Table of Contents
+ Title Page (1)
+ Table of Contents (2)
+ Introduction (3 - 4)
+ Cisco Switch Solution (4 - 9)
+o Edge Switch (Option 1) (4 - 5)
+o Edge Switch (Option 2) (5 - 6)
+o Data Center Switch (Option 1) (6 - 8)
+o Data Center Switch (Option 2) (8 - 9)
+ HP Switch Solution (9 - 13)
+o Edge Switch (Option 1) (9 - 10)
+o Edge Switch (Option 2) (10 - 11)
+o Data Center Switch (Option 1) (11 - 12)
+o Data Center Switch (Option 2) (12 - 13)
+ Fiber Term, Equip Racks & More (13 - 17)
+o Our Recommended Switching Solution (13 - 15)
+o Fiber patch panel details (15 - 16)
+o Network rack details (16 - 17)
+ Power (17 - 18)
+ Bibliography (18 - 19)
+
+3
+Introduction
+The following document's objective is to help provide a comprehensive plan to build a
+dedicated local area network telecommunication room on the 10th floor and connect it back to
+the data center on the second floor of the organization's building. Some objectives of this
+document are to make a secure, dependable, redundant, and fast network. This is important for a
+financial network as you are dealing with money and a compromise in the network or failure can
+result in companywide economic loss.
+This document will contain two solutions for ethernet switching equipment. The two
+ethernet switching vendor solutions we will compare are Cisco and HP. Also provided in this
+document is a diagram of the interconnection for the switching stacking solution. We have also
+included our opinion on which solution is more advantageous for the company. This document
+also addresses what rack and fiber patch panel we recommend for the network. Along with a
+power plan to make sure power is supplied constantly guaranteeing a good uptime. All solutions
+made meet the requirements set by the IT manager.
+The requirements are at least 250 Gb Ethernet ports provided by fully managed,
+stackable, rack mount Layer 2 switches to support edge connections. Fifty of these ports must
+provide PoE. There must be at least 100 Gb Ethernet ports to support data center equipment.
+These should be provided by managed, stackable, rack-mount Layer 3 switches. There must be
+(2) 10Gb fiber ports in the switching equipment to allow this telecommunication room to connect
+to the 10Gb fiber switches about one hundred yards away in the central data center on floor two.
+A fiber patch panel and associated fiber patch cables must be provided – otherwise, the fiber
+between floor two and floor ten is already present, terminated, and ready to plug into your fiber
+4
+patch panel. Three nineteen,” four post equipment racks will have to be provided. rackmountable UPS equipment that can provide power protection to all the ethernet switches, and
+five 350-watt servers, and still have at least 40% capacity remaining. Specification must be
+provided for the quantity and type of AC circuits and receptacles that electricians will be directed
+to provide in the telecommunications room. If any one of the above items is a single point of
+failure that could cause extended network outage time, spare parts or additional capacities should
+be purchased and kept on site.
+ Cisco Switching Solution
+Edge Switch (Option 1)
+Model name: Catalyst 9300L Series
+Model number: C9300L-48P-4G-E
+Spare Parts: (Price)
+Fan: FAN-T2: 160
+Cisco SFP-10G-SR 10GBASE-SR SFP Module: 50
+Quantity: five
+Stacking Solution: Stack Wise 320 Stacking Cables included
+Price: Individual: 4,000, Total: 20,160
+5
+Description: The Cisco Catalyst 9300L Series is a switch designed for network settings,
+like data centers, enterprise campuses, and branch offices. It offers scalability, high-performance
+advanced security features, and quality of service (QoS) to meet the demands of networks. These
+switches are known for using power efficiently. Provide redundancy and high availability with
+hot-swappable components and stacking capabilities. They operate on the Cisco IOS XE
+operating system, which supports a wide range of networking needs and is compatible with
+software-defined networking (SDN) to enhance network management and layer three switching.
+PoE is also supported over all ports, so you can power devices via the ethernet cord. Supports
+port speeds of over 1 Gbps over ethernet and speeds of 10Gbps over fiber. There are forty-eight
+copper ports and four fiber ports on each switch.
+Edge Switch (Option 2)
+Model name: Catalyst 9300LM Series
+Model number: C9300LM-48U-4Y
+Spare Parts: (Price)
+Fan: FAN-T2: 160
+6
+Cisco SFP-10G-SR 10GBASE-SR SFP Module: 50
+Quantity: five
+Stacking Solution: Stack wise 320 Stacking Cables included
+Price: Individual: 10,000, Total: 50,160
+Description: The Cisco Catalyst 9300LM Series is a switch designed for network
+environments, such as data centers, enterprise campuses, and branch offices. It offers scalability,
+high-performance advanced security features, and quality of service (QoS) to meet the demands
+of networks. These switches are recognized for their power usage. Provide redundancy and high
+availability through hot-swappable components and stacking capabilities. The Catalyst 9300LM
+Series operates on the Cisco IOS XE operating system, which supports a range of networking
+requirements and is compatible with software-defined networking (SDN) for improved network
+management. Additionally, all ports support PoE allowing devices to be powered through the
+Ethernet cable. The switches can get port speeds exceeding 1 Gbps over Ethernet. Speeds up to
+10 Gbps, over fiber connections.
+Data Center (Option 1)
+Model name: Catalyst 9500 series switches
+7
+Model number: C9500X-60L4D
+Quantity:
+(2) C9500X-60L4D
+Stacking Solutions: Stack Wise Virtual
+Price:
+C9500X-60L4D: 45,000
+Spare Parts: (Price)
+C9K-PWR-650WAC-R/2 650W AC Power Supply: 1,514
+C9500-ACC-KIT-19I= Accessory kit for Catalyst 9500 Series - 19" rack: 30
+Cisco SFP-10G-SR 10GBASE-SR SFP Module: 50
+C9K-T1-FANTRAY Catalyst 9500 fan tray: 750
+Total Price: 92,294
+Description: The Cisco Catalyst 9500X Se-ries is a powerful, expandable, and secure
+switch made for data centers. It provides level three routing and security options like MACsec
+encryption, NBAR, and Trust Sec. This Catalyst 9500X Series can also oversee a wide range of
+8
+QoS features and allows SDN compatibility. Every port back PoE. Fiber port speeds can reach a
+whopping four hundred Gbps. The C9500X-60L4D has sixty copper ports, each with 50 Gbps
+speeds, and four fiber ports for every switch.
+Data Center (Option 2)
+Model names: Catalyst 9500 series
+Model numbers: C9500-48Y4C
+Quantity: (3)
+Stacking Solutions: Stack Wise Virtual
+Price: Individual:16,000
+Spare Parts: (Price)
+C9K-PWR-650WAC-R/2 650W AC Power Supply: 1,514
+C9500-ACC-KIT-19I= Accessory kit for Catalyst 9500 Series - 19" rack: 30
+Cisco SFP-10G-SR 10GBASE-SR SFP Module: 50
+C9K-T1-FANTRAY Catalyst 9500 fan tray: 750
+Total Price: 50,294
+9
+Description: The Cisco Catalyst 9500 Se-ries is a powerful, expandable, and secure
+switch made for data ce-nters. It provides level three routing and Security options like MACsec
+encryption, NBAR, and Trust Sec. This Catalyst 9500 Series can also oversee a wide range of
+QoS features and allows SDN compatibility. Every port supports PoE. Fiber port speeds can
+reach one hundred Gbps. The C9500-48Y4C has forty-eight copper ports, each with 25 Gbps
+speeds, and four fiber ports for every switch.
+HP Switch Solution
+Edge Switches (Option 1)
+Model name: 6300M 48x 1G PoE / 4x SFP56
+Model number: JL661A
+Spare Parts: (Price)
+HPE Aruba X372 - power supply - hot-plug / redundant - 1050 Watt: 1,020
+HPE Aruba - SFP+ transceiver module - 10 GigE: 106
+Quantity: four
+Stacking Solution: The deterministic method Stacking Cables included
+Individual Price: 6,500
+Total Price: 27,026
+10
+Description: The Aruba 6300M 48x 1G PoE / 4x SFP56 (JL661A) is a powerful,
+expandable, and secure switch made to be a hybrid switch that can be used in data centers or
+edge switches. It provides Layer 3 routing and security options such as MACsec encryption. The
+6300M can also oversee a wide range of QoS features and allows SDN compatibility. Every port
+supports PoE, and fiber port speeds can reach 50 Gbps. The JL661A has forty-eight copper ports
+with 1 Gbps speed and 4 SFP56 ports.
+Edge Switches (Option 2)
+Model name: 2930M 48G 1-slot 48 Port Switch
+Model number: JL321A
+Spare Parts: (Price)
+HPE Aruba X372 - power supply - hot-plug / redundant - 1050 Watt: 1,020
+HPE Aruba - SFP+ transceiver module - 10 GigE: 106
+Quantity: five
+Stacking Solution: The deterministic method Stacking Cables included
+Individual Price: 2,000
+Total Price: 11,126
+11
+Description: The Aruba 2930M 48G 1-slot 48 Port Switch is an effective, low-cost, and
+easily manageable switch for small and medium businesses, department workplaces, and part
+networks. It provides Layer 3 routing and plenty of safety features, inclusive of MACsec
+encryption. The 2930M additionally helps PoE+ on all 48 ports. The copper port supports speeds
+of 1 Gbps and the two fiber ports help accelerate to 10 Gbps.
+Data Center (Option 1)
+Model name: 6300M 48x 1G PoE / 4x SFP56
+Model number: JL661A
+Spare Parts: (Price)
+HPE Aruba X372 - power supply - hot-plug / redundant - 1050 Watt: 1,020
+HPE Aruba - SFP+ transceiver module - 10 GigE: 106
+Quantity: two
+Stacking Solution: The deterministic method Stacking Cables included
+Individual Price: 6,500
+Total Price: 14,126
+Description: The Aruba 6300M 48x 1G PoE / 4x SFP56 (JL661A) is a powerful,
+expandable, and secure switch made to be a hybrid switch that can be used in data centers or
+12
+edge switches. It provides Layer 3 routing and security options such as MACsec encryption. The
+6300M can also oversee a wide range of QoS features and allows SDN compatibility. Every port
+supports PoE, and fiber port speeds can reach 50 Gbps. The JL661A has forty-eight copper ports
+with 1 Gbps speed and 4 SFP56 ports.
+Data Center (Option 2)
+Model names: Aruba 3810M 48G 1U 48-Ports 1-Slot Switch
+Model numbers: JL072A
+Spare Parts: (Price)
+HPE Aruba X372 - power supply - hot-plug / redundant - 1050 Watt: 1,020
+HPE Aruba - SFP+ transceiver module - 10 GigE: 106
+Quantity: three
+Stacking Solutions: resilient Stacking Cables included
+Individual price: 4,000
+Total price: 13,126
+13
+Description: The Aruba 3810M 48G 48-ports 1-slot switch offers surprisingly superior
+performance, scalable, and security characteristics such as MACsec encryption. Often used in
+environments like enterprise networks, branch offices, data centers, and many other purposes. It
+has all these features like 48 Gigabit Ethernet ports, support for PoE+, layer 3 routing, resilient
+stacking technology, 40Gbps speeds for ethernet, and ease of management with Aruba Airwave.
+Fiber Term, Equip Racks & More
+As far as what switching solution to use it makes sense to use Cisco. This is because the
+rest of the network equipment in the company is Cisco, and we think it would be good to keep
+the network equipment to one vendor instead of making a multi-vendor environment because
+management and costs of a single security vendor strategy can minimize equipment management
+and costs. Cisco also has more security options than HP.
+The best Cisco solution is Edge switch solution option one and data center switch
+solution option two. Which is five C9300L-48P-4G-E and three C9500-48Y4C. The reason
+14
+behind this is that this solution can achieve all the same features as the other options while
+saving the most amount of money. All the switches also happen to support layer three
+capabilities because layer two switches that meet all requirements of this are ruffly the same
+price in most cases. Layer three capabilities are nice to have on the edge switches as if we decide
+to implement VLANs it will allow for faster inter-VLAN routing.
+This is our diagram for the switching solution and how we would stack the switches. We
+built this diagram to provide maximum speed and redundancy. As there are multiple paths to
+15
+each switch all over fiber connections. We also used LACP (Link Aggregation Control Protocol)
+in certain areas of the 10th floor to provide more reductant and bandwidth to the switches. Then
+the links that will be used for connecting client devices will use the gigabit ethernet ports. We
+also stacked all the edge switches together to make one logical switch and did the same for the
+data center switches.
+We should back up the running configuration of all the switches to a TFTP or FTP server
+so that when we need to replace a switch, we can download the configuration from the server.
+The actual stacking is a bit different for each floor. On the 10th floor, it will be using Stack wise
+320 meaning the switches will have to be stacked in the order they are in the diagram and linked
+up together by the stack cables that will go on the back of the switch like in the picture below.
+The cables for reference are about three feet in length.
+We also need a place to terminate the fiber cables. We recommend buying 2 FHU 1U 19''
+Fiber Adapter Panel, 48 Fibers OM4 Multimode, 24 x LC UPC Duplex (Aqua) Adapter. This
+supports multi-mode fiber which is meant for long distances like up to the 10th floor. You can
+estimate it to be around one hundred feet. Multimode fiber can carry a signal up to 1804 feet. We
+also suggest Beyond Tech LC to LC Fiber Patch Cable Multimode 3ft patch cables. They work
+with the recommended patch panel and are cheap for fiber, sitting at around ten dollars per cable.
+16
+We suggest buying three Raising Electronics Server Rack 4 Post Open Rack Frame Rack
+Enclosure 19 Inch 42U. We suggest this because it is a very efficient use of money as the cost of
+one rack is only $ 220.30. It also meets all requirements having a nineteen” frame to fit all
+equipment and giving lots of extra room left over to help be able to scale the network within
+short notice.
+17
+Power
+Power Plan
+Equipment Watts
+Edge Switches 5,500
+Data Center Switches 4,500
+Switches Total 10,000
+Servers Total 1,750
+Total 11,750
+Total + 40% Capacity 16,450
+The UPS we recommend to power all this equipment is seven V7 Uninterruptible Power
+Supplies 3000VA UPS Rack Mount 2U LCD (UPS1RM2U3000-1N). We recommend this UPS
+because it has more than enough power to power all the equipment with 45% capacity remaining.
+It is also a rack-mountable device. It cost $5142.69. It also lasts for 20 mins once the power goes
+out. To supply all the power to all these UPS’s we will need 7 AC three-phase connections that
+supply 120 VAC.
+18
+In conclusion, we recommend getting five C9300L-48P-4G-E, three C9500-48Y4C plus
+spare parts, two FHU 1U 19' Fiber Adapter Panels, 24 Beyond Tech LC to LC Fiber multimode
+3ft patch cables, Three Raising Electronics Server Rack 4 Post Open Rack Frame Rack
+Enclosure 19 Inch 42U, and seven V7 Uninterruptible Power Supplies 3000VA UPS Rack
+Mount 2U LCD (UPS1RM2U3000-1N). The total cost for this will be excluding labor to install
+equipment and the electrician to install AC connections is $76,557.59.
+Bibliography
+Cisco Systems, Inc. "Cisco Catalyst 9300 Series Switches." Cisco.
+https://www.cisco.com/site/us/en/products/networking/switches/catalyst-9300-seriesswitches/index.html
+Cisco Systems, Inc. "Cisco Catalyst 9500 Series Switches." Cisco.
+https://www.cisco.com/site/us/en/products/networking/switches/catalyst-9500-seriesswitches/index.html#accordion-2656fb4fa8-item-fee594e233
+Hewlett Packard Enterprise. "HPE Network Switch Selector."
+https://techlibrary.hpe.com/ie/en/networking/products/switches/switch-selector.aspx
+19
+Amazon.com. "Multi-Mode Fiber Patch Cord."
+https://www.amazon.com/Multi-Mode-Fibre-Patch-Cord/dp/B00NFPIS4C?th=1
+Amazon.com. "Adjustable Network Server Enclosure Rack Rails - 4 Post Rack Frame."
+https://www.amazon.com/Frame-Adjustable-Network-ServerEnclosure/dp/B076C2VH38?source=ps-sl-shoppingadslpcontext&ref_=fplfs&smid=A1W6OOCXYFCO1C&th=1
+FS.COM. "Adjustable Network Server Enclosure Rack Rails - 4 Post Rack Frame."
+https://www.fs.com/products/69082.html
+Amazon.com. "V7 Uninterruptible Power Supplies 3000VA UPS1RM2U3000-1N."
+https://www.amazon.com/V7-Uninterruptible-Supplies-3000VA-UPS1RM2U3000-
+1N/dp/B06WVGDFCR/ref=sr_1_29
+      </pre>
+    </section>
+  </main>
+
+  <footer>
+    <p>Author: Holden G. Weber</p>
+    <p>For more information, visit <a href="https://github.com/yourprojectlink">Project GitHub</a>.</p>
+  </footer>
+</body>
+</html>
