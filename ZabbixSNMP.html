@@ -194,7 +194,8 @@ mysql&gt; quit;</code></pre>
         
         <li>Import Zabbix's initial schema and data:</li>
         <pre><code>
-sudo zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix
+sudo zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz 
+          | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix
         </code></pre>
 
         <li>Disable log_bin_trust_function_creators:</li>
