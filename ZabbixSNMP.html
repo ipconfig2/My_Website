@@ -190,6 +190,104 @@ mysql&gt; create user zabbix@localhost identified by 'password';
 mysql&gt; grant all privileges on zabbix.* to zabbix@localhost;
 mysql&gt; quit;</code></pre>
       </ol>
+      </code></pre>
+        
+        <li>Import Zabbix's initial schema and data:</li>
+        <pre><code>
+sudo zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix
+        </code></pre>
+
+        <li>Disable log_bin_trust_function_creators:</li>
+        <pre><code>
+sudo mysql
+mysql&gt; set global log_bin_trust_function_creators = 0;
+mysql&gt; quit;
+        </code></pre>
+
+        <li>Configure the Zabbix server configuration file:</li>
+        <pre><code>sudo nano /etc/zabbix/zabbix_server.conf</code></pre>
+        <p>Set the password:</p>
+        <pre><code>DBPassword=password</code></pre>
+      </ol>
+
+      <h3>Starting Zabbix and Accessing the UI</h3>
+      <ol>
+        <li>Start and enable Zabbix services:</li>
+        <pre><code># systemctl restart zabbix-server zabbix-agent apache2
+# systemctl enable zabbix-server zabbix-agent apache2</code></pre>
+
+        <li>Open Zabbix UI at <a href="http://host/zabbix">http://host/zabbix</a>.</li>
+        <li>Follow the prompts to set up your Zabbix front-end:</li>
+        <ul>
+          <li>Enter your database password.</li>
+          <li>Select your timezone, server name, and theme.</li>
+          <li>Complete the installation and log in using the default credentials: Admin / zabbix.</li>
+        </ul>
+        <figure>
+          <img src="imagesSNMP/image6.png" alt="Zabbix Front-End Complete" width="100%">
+          <figcaption>Completed Zabbix Front-End Installation</figcaption>
+        </figure>
+      </ol>
+
+      <h3>Adding Hosts</h3>
+      <ol>
+        <li>Download the Zabbix agent for Windows:</li>
+        <p>Visit <a href="https://www.zabbix.com/download_agents">https://www.zabbix.com/download_agents</a> to download the appropriate agent.</p>
+        <li>Configure the agent with the correct server IP and hostname.</li>
+        <li>Add the host to Zabbix under "Data Collection" > "Hosts."</li>
+        <figure>
+          <img src="imagesSNMP/image1.png" alt="Adding Host in Zabbix" width="100%">
+          <figcaption>Adding a Host in Zabbix</figcaption>
+        </figure>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Security Considerations</h2>
+      <p>When using SNMP, ensure devices use SNMP v3 for secure data transmission. Additionally, change the default Zabbix credentials from Admin/zabbix to a unique username and password.</p>
+    </section>
+
+    <section>
+      <h2>Setting Up Alerts</h2>
+      <ol>
+        <li>Navigate to the Alerts tab > Actions > Trigger Actions.</li>
+        <li>Select "Report problems to Zabbix admins" and configure conditions:</li>
+        <ul>
+          <li>Add condition: Host Groups > Windows Server</li>
+          <li>Set severity: greater than or equal to "Average"</li>
+          <li>Add tag: Env = production</li>
+        </ul>
+        <li>Under Operations, configure notifications:</li>
+        <ul>
+          <li>Send alert to Admin</li>
+          <li>Set up recovery operation to notify Admin on recovery</li>
+        </ul>
+        <figure>
+          <img src="imagesSNMP/image17.png" alt="Configuring Alerts in Zabbix" width="100%">
+          <figcaption>Configuring Alerts in Zabbix</figcaption>
+        </figure>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Conclusion</h2>
+      <p>Zabbix offers robust SNMP monitoring with a high level of customization and flexibility. Through my setup experience, I found that Zabbix's extensive monitoring capabilities and customization options make it an excellent choice for SNMP monitoring in a home network environment.</p>
+    </section>
+
+    <section>
+      <h2>Work Cited</h2>
+      <ul>
+        <li>LogicMonitor: Cloud-Based Infrastructure Monitoring Platform, https://www.logicmonitor.com/. Accessed 23 March 2024.</li>
+        <li>WhatsUp Gold: IT Infrastructure Monitoring Made Easy, https://www.whatsupgold.com/. Accessed 23 March 2024.</li>
+        <li>LibreNMS, https://www.librenms.org/. Accessed 23 March 2024.</li>
+        <li>Zabbix: The Enterprise-Class Open Source Network Monitoring Solution, https://www.zabbix.com/. Accessed 23 March 2024.</li>
+        <li>Wikipedia, https://prometheus.io/. Accessed 23 March 2024.</li>
+        <li>Observium, https://www.observium.org/. Accessed 23 March 2024.</li>
+        <li>Nagios Open Source, https://www.nagios.org/. Accessed 23 March 2024.</li>
+        <li>“Network Device Monitoring.” Datadog, https://www.datadoghq.com/product/network-monitoring/network-device-monitoring/. Accessed 23 March 2024.</li>
+        <li>“Network Monitoring Software & Solutions.” ManageEngine, https://www.manageengine.com/network-monitoring/. Accessed 23 March 2024.</li>
+        <li>“SNMP Monitoring - SNMP Monitoring Tools.” SolarWinds, https://www.solarwinds.com/network-performance-monitor/use-cases/snmp-monitoring. Accessed 23 March 2024.</li>
+      </ul>
     </section>
   </main>
  <script src="myscripts.js"></script>
