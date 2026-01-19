@@ -6,15 +6,15 @@
   <title>Proxmox Cluster with QDevice & Data Center Manager</title>
   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
   <link rel="stylesheet" href="Blog_Post.css">
+
   <!-- Social Embed -->
-<meta property="og:title" content="Holden Weber – IT Blog">
-<meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
-<meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
-<meta property="og:url" content="https://holdenweber.com/">
-<meta property="og:type" content="website">
-
-<meta name="twitter:card" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
-
+  <meta property="og:title" content="Holden Weber – IT Blog">
+  <meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+  <meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+  <meta property="og:url" content="https://holdenweber.com/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
 </head>
 <body>
   <div id="mySidenav" class="sidenav">
@@ -24,7 +24,7 @@
     <a href="Holden_Weber_Resume.html">Resume</a>
   </div>
 
- <!-- Hamburger Menu -->
+  <!-- Hamburger Menu -->
   <span onclick="openNav()">
     <div class="hamburger" id="hamburger">
       <div class="line"></div>
@@ -33,112 +33,132 @@
     </div>
   </span>
 
-<body>
+  <header>
+    <h1>Proxmox Cluster with QDevice & Data Center Manager</h1>
+  </header>
 
-  <h1>Introduction</h1>
-  <p>I am setting up another Proxmox server and making a cluster with my current one. I will then install and setup Proxmox Data Center to have a dashboard to view my Proxmox environment.</p>
+  <main>
+    <section>
+      <h2>Introduction</h2>
+      <p>I am setting up another Proxmox server and making a cluster with my current one. I will then install and setup Proxmox Data Center to have a dashboard to view my Proxmox environment.</p>
+    </section>
 
-  <h1>Setting up the Cluster</h1>
+    <section>
+      <h2>Setting up the Cluster</h2>
+      
+      <h3>Main Node Configuration</h3>
+      <p>On the main node, create the cluster with the command:</p>
+      <pre>pvecm create homelab</pre>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image1.png" alt="Cluster creation output" width="100%">
+      <p><em>Fig 1: Creating the Proxmox Cluster</em></p>
 
-  <h2>Main Node Config</h2>
-  <p>On the main node, you will want to create the cluster. In order to do that, run the command:</p>
-  <pre>pvecm create homelab</pre>
-  <p>It will show something like this:</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image1.jpg" alt="Cluster creation output">
+      <p>Check cluster status:</p>
+      <pre>pvecm status</pre>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image2.png" alt="Primary node status" width="100%">
+      <p><em>Fig 2: Primary node status</em></p>
+    </section>
 
-  <p>To confirm that it was created properly, send the command:</p>
-  <pre>pvecm status</pre>
-  <p>This will show only one node (your primary):</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image2.png" alt="Primary node status">
+    <section>
+      <h3>Node 2 Configuration</h3>
+      <p>Join node 2 to the cluster (replace IP with primary node's IP):</p>
+      <pre>pvecm add 172.16.1.24</pre>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image3.png" alt="Node 2 join output" width="100%">
+      <p><em>Fig 3: Node 2 added to cluster</em></p>
 
-  <h2>Node 2 Config</h2>
-  <p>Since Node 1 created the cluster, you will need to join node 2 to it. While accessing the CLI of node 2, run the command (replace 172.16.1.24 with your primary node IP):</p>
-  <pre>pvecm add 172.16.1.24</pre>
-  <p>You should see "Successfully added node 'pve2' to cluster."</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image3.png" alt="Node 2 join output">
+      <p>Verify nodes:</p>
+      <pre>pvecm nodes</pre>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image4.png" alt="Cluster nodes list" width="100%">
+      <p><em>Fig 4: Cluster nodes listing</em></p>
+    </section>
 
-  <p>To verify, run:</p>
-  <pre>pvecm nodes</pre>
-  <p>You should see both your primary and secondary nodes with their names.</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image4.jpg" alt="Cluster nodes list">
+    <section>
+      <h2>QDevice Setup</h2>
+      <p>With only 2 nodes, you need a QDevice to maintain quorum if one node fails. This can be a small VM, Raspberry Pi, or another system.</p>
+      <ul>
+        <li>Cores: 1</li>
+        <li>RAM: 1 GB</li>
+        <li>Storage: 6 GB</li>
+        <li>OS: Debian 12</li>
+      </ul>
 
-  <h2>QDevice Specs</h2>
-  <p>With only 2 nodes in the cluster, if one goes down, your remaining node will not hold quorum. To bypass this, create a QDevice. This can be a VM, Raspberry Pi, or another computer. Specs don’t need to be high.</p>
-  <p>Example VM on my Ugreen NAS:</p>
-  <ul>
-    <li>Cores: 1</li>
-    <li>RAM: 1 GB</li>
-    <li>Storage: 6 GB</li>
-    <li>OS: Debian 12</li>
-  </ul>
+      <h3>Configuration Steps</h3>
+      <p>Set a static IP for the QDevice:</p>
+      <pre>nano /etc/network/interfaces</pre>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image5.png" alt="Static IP config" width="100%">
+      <p><em>Fig 5: Configuring static IP</em></p>
 
-  <h2>QDevice Config</h2>
-  <p>Set a static IP for the QDevice. Edit:</p>
-  <pre>nano /etc/network/interfaces</pre>
-  <p>Add your preferred IP, gateway, and DNS servers:</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image5.png" alt="Static IP config">
+      <p>Install corosync on QDevice:</p>
+      <pre>apt install corosync-qnetd -y</pre>
 
-  <p>Install corosync:</p>
-  <pre>apt install corosync-qnetd -y</pre>
-
-  <p>Adjust SSH settings on the QDevice and Proxmox nodes:</p>
-  <pre>nano /etc/ssh/sshd_config</pre>
-  <p>Uncomment and set:</p>
-  <pre>
+      <p>Adjust SSH settings for root login and password authentication:</p>
+      <pre>
 PermitRootLogin yes
 PasswordAuthentication yes
-  </pre>
+      </pre>
 
-  <p>Install corosync qdevice on both Proxmox nodes:</p>
-  <pre>apt install corosync-qdevice -y</pre>
-  <p>Set up QDevice on one node:</p>
-  <pre>pvecm qdevice setup 172.16.1.50</pre>
+      <p>Install corosync qdevice on both Proxmox nodes:</p>
+      <pre>apt install corosync-qdevice -y</pre>
+      <p>Setup QDevice on one node:</p>
+      <pre>pvecm qdevice setup 172.16.1.50</pre>
 
-  <p>Check cluster status:</p>
-  <pre>pvecm status</pre>
-  <p>If "expected votes: 3" appears, quorum is maintained.</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image2.png" alt="Cluster status with QDevice">
+      <p>Verify quorum:</p>
+      <pre>pvecm status</pre>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image2.png" alt="Cluster status with QDevice" width="100%">
+      <p><em>Fig 6: Cluster status showing quorum</em></p>
+    </section>
 
-  <p>In the Proxmox web UI (Datacenter &gt; Cluster), you will see your two Proxmox nodes (QDevice is not visible as it is not a Proxmox server):</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image5.png" alt="Proxmox nodes in web UI">
+    <section>
+      <h2>Proxmox Web UI Overview</h2>
+      <p>View your nodes in the web UI:</p>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image5.png" alt="Proxmox nodes in web UI" width="100%">
+      <p><em>Fig 7: Nodes visible in Proxmox web interface</em></p>
+    </section>
 
-  <h1>Setting up Data Center Manager</h1>
-  <p>Download the datacenter ISO here: <a href="https://www.proxmox.com/en/downloads/proxmox-datacenter-manager">Proxmox Data Center Manager</a></p>
+    <section>
+      <h2>Data Center Manager Setup</h2>
+      <p>Download Proxmox Data Center Manager: <a href="https://www.proxmox.com/en/downloads/proxmox-datacenter-manager">Download</a></p>
 
-  <h2>Install Data Center Manager</h2>
-  <p>Install DCM on a VM with better specs than the QDevice:</p>
-  <ul>
-    <li>Cores: 2</li>
-    <li>RAM: 4 GB</li>
-    <li>Disk: 40 GB</li>
-    <li>OS: Proxmox DCM</li>
-  </ul>
-  <p>Access it at: <a href="http://your-ip:8443">http://your-ip:8443</a></p>
+      <h3>Installation</h3>
+      <ul>
+        <li>Cores: 2</li>
+        <li>RAM: 4 GB</li>
+        <li>Disk: 40 GB</li>
+        <li>OS: Proxmox DCM</li>
+      </ul>
+      <p>Access DCM at: <a href="http://your-ip:8443">http://your-ip:8443</a></p>
 
-  <h2>Linking with your Cluster</h2>
-  <p>Login to the DCM web UI, then go Remotes &gt; Add &gt; Proxmox VE. Enter server IP and port (e.g., 172.16.1.24:8006).</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image13.png" alt="Add Proxmox remote">
+      <h3>Linking with Cluster</h3>
+      <p>In DCM: Remotes → Add → Proxmox VE. Enter server IP and port.</p>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image13.png" alt="Add Proxmox remote" width="100%">
+      <p><em>Fig 8: Adding Proxmox remote</em></p>
 
-  <p>Click Next &gt; Use Existing Token</p>
+      <h3>Creating and Using API Token</h3>
+      <p>Generate token on primary node (Datacenter → Permissions → API Tokens → Add):</p>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image14.png" alt="Create API token" width="100%">
+      <p><em>Fig 9: Creating API token</em></p>
 
-  <h3>Creating a Token</h3>
-  <p>On the primary node: Datacenter &gt; Permissions &gt; API Tokens &gt; Add. Name your token under Token ID, uncheck Privilege Separation, click Add.</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image14.png" alt="Create API token">
+      <p>Copy Token ID and Secret into DCM remote setup:</p>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image9.png" alt="Token ID and Secret" width="100%">
+      <p><em>Fig 10: Token credentials</em></p>
 
-  <p>Copy the Token ID and Secret to use in DCM:</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image9.png" alt="Token ID and Secret">
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image10.png" alt="DCM remote setup" width="100%">
+      <p><em>Fig 11: Configuring remote in DCM</em></p>
 
-  <p>Paste Token ID under Token and Secret under Secret in DCM. Give the Remote ID a value.</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image10.png" alt="DCM remote setup">
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image7.png" alt="DCM summary" width="100%">
+      <p><em>Fig 12: Summary of remote setup</em></p>
+    </section>
 
-  <p>Click Next. Adjust hostnames/IPs if needed, then finish the summary.</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image7.png" alt="DCM summary">
+    <section>
+      <h2>Accessing Dashboard</h2>
+      <p>View cluster information in DCM dashboard:</p>
+      <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image3.png" alt="DCM dashboard" width="100%">
+      <p><em>Fig 13: Data Center Manager dashboard</em></p>
+    </section>
+  </main>
 
-  <h2>Accessing Dashboard</h2>
-  <p>Go Remotes &gt; PVE to view nodes info:</p>
-  <img src="/images/proxmox_cluster_qdevice_datacenter_manager/image3.png" alt="DCM dashboard">
-
-  <p>Click dashboard to see the full Data Center Manager dashboard.</p>
-
+  <script src="myscripts.js"></script>
+  <footer>
+    <p>Author: Holden Weber</p>
+  </footer>
 </body>
 </html>
