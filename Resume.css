@@ -1,130 +1,153 @@
-body {
-  font-family: Arial, sans-serif;
+/* =====================
+   GLOBAL RESET & TEXT
+===================== */
+* {
   margin: 0;
-  padding: 20px;
-  background-color: #333;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.container {
-  max-width: 800px;
-  margin: 0 auto;
+body {
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #e0f0d8;
+  background-color: #081b08; /* slightly darker green for background */
   padding: 20px;
-  background-color: #fff;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-h1,h2,h3 {
-  color: #333;
+/* =====================
+   HEADINGS
+===================== */
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #00ff66;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
 h2 {
-  border-bottom: 2px solid #333;
-  padding-bottom: 5px;
-  margin-top: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #00a33f;
+  border-bottom: 2px solid #00a33f;
+  padding-bottom: 6px;
+  margin: 25px 0 15px;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #c7f0d3;
+  margin-bottom: 8px;
+}
+
+/* =====================
+   PARAGRAPHS & LISTS
+===================== */
+p, li {
+  font-family: inherit;
+  color: #c7f0d3;
 }
 
 ul {
-  list-style-type: none;
-  padding: 0;
+  list-style-type: disc;
+  padding-left: 20px;
 }
 
 ul li {
   margin-bottom: 10px;
-}
-/* The side navigation menu */
-.sidenav {
-  height: 100%; /* 100% Full-height */
-  width: 0; /* 0 width - change this with JavaScript */
-  position: fixed; /* Stay in place */
-  z-index: 2; /* Stay on top */
-  top: 0; /* Stay at the top */
-  right: 0;
-  background-color: #111; /* Black*/
-  overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 60px; /* Place content 60px from the top */
-  transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+  line-height: 1.5;
 }
 
-/* The navigation menu links */
-.sidenav a {
-  padding: 8px 8px 8px 32px;
+/* =====================
+   CONTAINER / CARD
+===================== */
+.container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 35px;
+  background-color: #111; /* dark card for content */
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+}
+
+/* =====================
+   SECTIONS
+===================== */
+section {
+  margin-bottom: 30px;
+}
+
+section ul li strong {
+  color: #00ff66; /* highlight company names or key info */
+}
+
+section ul li em {
+  color: #a0f0b0; /* subtle secondary info */
+}
+
+/* =====================
+   LINKS
+===================== */
+a {
+  color: #00ff66;
   text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-  transition: 0.3s;
+  transition: color 0.3s ease;
 }
 
-/* When you mouse over the navigation links, change their color */
-.sidenav a:hover {
-  color: #f1f1f1;
+a:hover {
+  color: #ffffff;
+  text-decoration: underline;
 }
 
-/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
-.main {
-  transition: margin-left .5s;
-  padding: 20px;
-}
-
-/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-}
-.hamburger {
-    display: flex;
-    position: absolute;
-    top: 1%; /* Position from the top */
-    right: 20px; /* Distance from the left */
-    z-index: 2; /* Stay on top */
-    flex-direction: column;
-    justify-content: space-between;
-    width: 30px;
-    height: 20px;
-    cursor: pointer;
-}
-
-.line {
-    width: 100%;
-    height: 4px; /* Increased thickness */
-    background-color: #ffffff;
-    transition: all 0.3s ease;
-    z-index: 2; /* Stay on top */
-    border-radius: 3px; /* Rounded edges */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
-}
-
-
-
-.hamburger:hover .line {
-    background-color: #555;
-}
-
-.hamburger.active .line:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-}
-
-.hamburger.active .line:nth-child(2) {
-    opacity: 0;
-}
-
-.hamburger.active .line:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-}
-
+/* =====================
+   BUTTONS
+===================== */
 #downloadButton {
-  padding: 10px 20px;
+  padding: 14px 28px;
   font-size: 16px;
-  background-color: #007bff;
+  font-family: inherit;
+  font-weight: 600;
+  background-color: #00a33f;
   color: #fff;
-  border: none; /* Round Edges */
-  border-radius: 5px;
-  display: block; /* Ensures the button takes the full width */
-  margin: 0 auto; /* Centers the button horizontally */
+  border: none;
+  border-radius: 8px;
+  display: block;
+  margin: 25px auto 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
-
 
 #downloadButton:hover {
-  background-color: #0056b3;
+  background-color: #00ff66;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+@media screen and (max-width: 768px) {
+  body {
+    padding: 15px;
+  }
+
+  .container {
+    padding: 25px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
 }

@@ -1,113 +1,243 @@
-/* The side navigation menu */
-.sidenav {
-  height: 100%; /* 100% Full-height */
-  width: 0; /* 0 width - change this with JavaScript */
-  position: fixed; /* Stay in place */
-  z-index: 2; /* Stay on top */
-  top: 0; /* Stay at the top */
-  right: 0;
-  background-color: #111; /* Black*/
-  overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 60px; /* Place content 60px from the top */
-  transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+/* =====================
+   CSS Variables & Base Styles
+===================== */
+:root {
+  --bg-color: #121912;
+  --card-bg: #1e2c1e;
+  --card-hover-bg: #2a3a2a;
+  --primary-green: #66bb6a;
+  --medium-green: #81c784;
+  --light-green: #c8e6c9;
+  --text-color: #e0e0e0;
+  --date-color: #a5d6a7;
+  --tag-bg: #81c784;
+  --tag-text: #121912;
 }
 
-/* The navigation menu links */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  font-size: 18px;
+  line-height: 1.8;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 20px;
+  background-image: radial-gradient(circle at top left, #1a291a 0%, #121912 100%);
+}
+
+/* =====================
+   Side Navigation
+===================== */
+.sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  background-color: #1b5e20;
+  overflow-x: hidden;
+  padding-top: 60px;
+  transition: 0.5s;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+}
+
 .sidenav a {
-  padding: 8px 8px 8px 32px;
+  padding: 12px 8px 12px 32px;
   text-decoration: none;
-  font-size: 25px;
-  color: #818181;
+  font-size: 22px;
+  color: var(--light-green);
   display: block;
   transition: 0.3s;
 }
 
-/* When you mouse over the navigation links, change their color */
 .sidenav a:hover {
-  color: #f1f1f1;
+  color: #ffffff;
 }
 
-/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
-.main {
-  transition: margin-left .5s;
-  padding: 20px;
-}
-
-/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-}
-.hamburger {
-    display: flex;
-    position: absolute;
-    top: 1%; /* Position from the top */
-    right: 20px; /* Distance from the left */
-    z-index: 2; /* Stay on top */
-    flex-direction: column;
-    justify-content: space-between;
-    width: 30px;
-    height: 20px;
-    cursor: pointer;
-}
-
-.line {
-    width: 100%;
-    height: 4px; /* Increased thickness */
-    background-color: #ffffff;
-    transition: all 0.3s ease;
-    z-index: 2; /* Stay on top */
-    border-radius: 3px; /* Rounded edges */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
-}
-
-
-
-.hamburger:hover .line {
-    background-color: #555;
-}
-
-.hamburger.active .line:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-}
-
-.hamburger.active .line:nth-child(2) {
-    opacity: 0;
-}
-
-.hamburger.active .line:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-}
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 20px;
-  background-color: #333;
-}
-
-.content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-h1 {
-  color: #333;
-}
-section {
-  margin-top: 20px;
-}
-p {
-  margin-bottom: 20px;
-}
-ul {
-  margin-bottom: 20px;
-  padding-left: 20px;
-}
-footer {
+/* =====================
+   Page Headings
+===================== */
+header h1 {
   text-align: center;
-  margin-top: 20px;
-  color: #666;
+  margin-bottom: 40px;
+  font-family: 'Merriweather', serif;
+  font-size: 2.5rem;
+  color: var(--medium-green);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
+
+/* =====================
+   Blog Posts Container
+===================== */
+.posts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* =====================
+   Individual Post Cards
+===================== */
+.post-card {
+  background-color: var(--card-bg);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 -2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s forwards;
+}
+
+.post-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+  background: linear-gradient(135deg, var(--card-bg), var(--card-hover-bg));
+  border-left: 4px solid var(--primary-green);
+}
+
+/* =====================
+   Animation
+===================== */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =====================
+   Post Images
+===================== */
+.post-card .post-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  background-color: #2a3a2a;
+}
+
+/* =====================
+   Post Content
+===================== */
+.post-card .tag {
+  display: inline-block;
+  background-color: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.post-card h2 {
+  font-family: 'Merriweather', serif;
+  font-size: 1.5rem;
+  color: var(--primary-green);
+  margin-bottom: 10px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.post-card h2 a {
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.post-card h2 a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  background: var(--light-green);
+  left: 0;
+  bottom: -2px;
+  transition: width 0.3s ease;
+}
+
+.post-card h2 a:hover::after {
+  width: 100%;
+}
+
+.post-card .date {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--date-color);
+  margin-bottom: 10px;
+}
+
+.post-card .excerpt {
+  font-size: 0.95rem;
+  color: #b0ccb0;
+  margin-bottom: 10px;
+}
+
+.post-card p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.post-card p a {
+  color: var(--primary-green);
+  text-decoration: underline dotted;
+  transition: color 0.3s ease;
+}
+
+.post-card p a:hover {
+  color: var(--light-green);
+}
+
+/* =====================
+   Read More Button
+===================== */
+.read-more {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--medium-green);
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.read-more:hover {
+  color: var(--light-green);
+}
+
+/* =====================
+   Responsive Adjustments
+===================== */
+@media screen and (max-width: 600px) {
+  .post-card {
+    padding: 15px;
+  }
+  .posts-container {
+    padding: 0 10px;
+  }
+  .post-card .post-image {
+    height: 140px;
+  }
+}
+
+/* =====================
+   Tag Color Variations
+===================== */
+.tag.sql { background-color: #81c784; }
+.tag.linux { background-color: #66bb6a; }
+.tag.vpn { background-color: #a5d6a7; }
+.tag.zabbix { background-color: #558b2f; }
+.tag.movie { background-color: #aed581; }
+.tag.bash { background-color: #9ccc65; }
+.tag.windows { background-color: #7cb342; }
+.tag.lan { background-color: #689f38; }

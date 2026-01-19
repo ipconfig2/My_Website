@@ -1,0 +1,96 @@
+/* Hamburger button */
+.hamburger {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 30px;
+  height: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  z-index: 10001; /* above sidenav */
+}
+
+.line {
+  width: 100%;
+  height: 3px;
+  background-color: #00a33f;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Animate hamburger into X */
+.hamburger.active .line:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+.hamburger.active .line:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.active .line:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Hover effect */
+.hamburger:hover .line {
+  background-color: #00ff66;
+}
+
+/* Side navigation menu */
+.sidenav {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 0;
+  background-color: #0b2e0a;
+  overflow-x: hidden;
+  padding-top: 80px;
+  transition: width 0.4s ease;
+  z-index: 10000; /* below hamburger but above content */
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav a {
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif; /* consistent font */
+  font-weight: 500; /* medium weight */
+  font-size: 18px; /* consistent size */
+  line-height: 1.8; /* consistent spacing between lines */
+  color: #c7f0d3; /* light green text */
+  text-decoration: none;
+  padding: 16px 32px; /* consistent padding around links */
+  margin: 4px 0; /* consistent spacing between links */
+  border-radius: 6px; /* subtle rounded edges */
+  display: block;
+  transition: all 0.3s ease; /* smooth hover */
+}
+
+/* Hover effect */
+.sidenav a:hover {
+  color: #fff; /* text turns white on hover */
+  background-color: rgba(0, 163, 63, 0.2); /* subtle green highlight */
+  transform: translateX(-5px); /* slight slide for interactivity */
+}
+
+/* Open/close width */
+.sidenav.open {
+  width: 260px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .sidenav a {
+    font-size: 20px;
+    padding: 12px 24px;
+  }
+
+  .hamburger {
+    width: 28px;
+    height: 20px;
+  }
+
+  .line {
+    height: 2.5px;
+  }
+}

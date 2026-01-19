@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home - Holden Weber</title>
-   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
-    <link rel="stylesheet" href="Home_style.css">
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico" />
+  <link rel="stylesheet" href="Home_style.css" />
+  <link rel="stylesheet" href="hamburger.css" />
 </head>
 <body>
+
+  <!-- Side Navigation -->
   <div id="mySidenav" class="sidenav">
     <a href="index.html">Home</a>
     <a href="Blog.html">Blog</a>
@@ -15,26 +18,41 @@
     <a href="Holden_Weber_Resume.html">Resume</a>
   </div>
 
-  <span onclick="openNav()">
-    <div class="hamburger">
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
+  <!-- Hamburger Menu -->
+  <div class="hamburger" onclick="openNav()">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
   </div>
-  </span>
-  <div class="main">
-  <div class="content">
-    <video autoplay muted loop id="myVideo">
-      <source src="WaterfallClip.mp4" type="video/mp4">
-    </video>
-    <div class="name">Holden Weber</div>
-    <div class="job-title">Information Technology</div>
-    <div class="ad"><marquee>New Blog Post: SQL Database Management for a Medical System</marquee></div>
+
+  <!-- Video Background -->
+  <video autoplay muted loop id="myVideo">
+    <source src="videos/HomeVideo.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- Gradient Overlay -->
+  <div class="video-overlay"></div>
+
+  <!-- Main Content -->
+  <main class="content">
+    <h1 class="name">Holden Weber</h1>
+    <p class="job-title">Network Administrator</p>
+
+    <div class="ad">
+      📝 New Blog Post: SQL Database Management for a Medical System
+    </div>
+
     <div class="explore-button">
-    <a href="Blog.html" class="explore-link">Explore</a>
+      <a href="Blog.html" class="explore-link">Explore Blog</a>
     </div>
-    </div>
-  </div>
+  </main>
+
+  <!-- Optional Footer -->
+  <footer style="position: fixed; bottom: 20px; width: 100%; text-align: center; color: #81c784; font-size: 0.9rem;">
+    © 2026 Holden Weber
+  </footer>
+
   <script src="myscripts.js"></script>
 </body>
 </html>

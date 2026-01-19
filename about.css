@@ -1,131 +1,170 @@
-body {
-  font-family: 'Times New Roman', Times, serif;
-  font-size: 20px;
-  line-height: 2;
+/* =====================
+   GLOBAL RESET & TEXT
+===================== */
+* {
   margin: 0;
-  padding: 20px;
-  background-color: #333;
-  color: #333;
+  padding: 0;
+  box-sizing: border-box;
 }
-header {
-  color: #fff;
+
+body {
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #e0f0d8;
+  background-color: #081b08; /* dark green background for page */
   padding: 20px;
-  text-align: center;\
-  margin-bottom: 20px;
 }
-main {
-  max-width: 1200px;
+
+/* =====================
+   CONTAINER / CARD
+===================== */
+.container {
+  max-width: 850px;
   margin: 0 auto;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  background-color: #111; /* dark content card */
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
 }
-h1, h2 {
-  color: #333;
-}
-h2 {
-  margin-top: 30px;
-}
-section {
+
+/* =====================
+   HEADER
+===================== */
+.about-header {
   text-align: center;
+  margin-bottom: 30px;
 }
-ul {
-  margin-bottom: 20px;
+
+.about-header h1 {
+  font-size: 36px;
+  color: #00ff66;
+  margin-bottom: 8px;
 }
-a {
-  color: #009dff;
-  text-decoration: none;
+
+.subtitle {
+  font-size: 18px;
+  color: #a0f0b0;
+  font-weight: 500;
 }
+
+/* =====================
+   PROFILE IMAGE
+===================== */
 .author-pic {
   text-align: center;
+  margin: 35px 0; /* spacing above/below */
+  overflow: hidden; /* ensures image doesn’t overflow circular frame */
+  width: 220px;    /* fixed container size */
+  height: 220px;
+  border-radius: 50%; /* keep it circular */
+  border: 4px solid #00ff66;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+
+.author-pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.1); /* zoom in 10% */
+  transition: transform 0.3s ease;
+  border-radius: 50%; /* keep image inside circle */
+}
+
+.author-pic img:hover {
+  transform: scale(1.15); /* zoom slightly more on hover for effect */
+}
+
+/* Responsive adjustment */
+@media screen and (max-width: 768px) {
+  .author-pic {
+    width: 160px;
+    height: 160px;
+  }
+
+  .author-pic img {
+    transform: scale(1.1); /* keep zoom effect on smaller screens */
+  }
+}
+
+
+
+/* =====================
+   ABOUT TEXT
+===================== */
+.about-text p {
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #c7f0d3;
+}
+
+.quick-facts {
+  list-style: disc;
+  padding-left: 20px;
+}
+
+.quick-facts li {
+  margin-bottom: 10px;
+  line-height: 1.5;
+  color: #c7f0d3;
+}
+
+/* =====================
+   BUTTONS
+===================== */
+.coffee-btn {
+  text-align: center;
   margin-top: 30px;
 }
-.author-pic img {
-  border-radius: 50%;
-  width: 350px;
-  height: 350px;
-}
-footer {
-  text-align: center;
-  margin-top: 20px;
-  color: #666;
-}
-/* The side navigation menu */
-.sidenav {
-  height: 100%; /* 100% Full-height */
-  width: 0; /* 0 width - change this with JavaScript */
-  position: fixed; /* Stay in place */
-  z-index: 2; /* Stay on top */
-  top: 0; /* Stay at the top */
-  right: 0;
-  background-color: #111; /* Black*/
-  overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 60px; /* Place content 60px from the top */
-  transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
-}
 
-/* The navigation menu links */
-.sidenav a {
-  padding: 8px 8px 8px 32px;
+/* =====================
+   LINKS
+===================== */
+a {
+  color: #00ff66;
   text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-  transition: 0.3s;
+  transition: color 0.3s ease;
 }
 
-/* When you mouse over the navigation links, change their color */
-.sidenav a:hover {
-  color: #f1f1f1;
+a:hover {
+  color: #ffffff;
+  text-decoration: underline;
 }
 
-/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
-.main {
-  transition: margin-left .5s;
-  padding: 20px;
+/* =====================
+   FOOTER
+===================== */
+.about-footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #a0f0b0;
 }
 
-/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-}
-.hamburger {
-    display: flex;
-    position: absolute;
-    top: 1%; /* Position from the top */
-    right: 20px; /* Distance from the left */
-    z-index: 2; /* Stay on top */
-    flex-direction: column;
-    justify-content: space-between;
-    width: 30px;
-    height: 20px;
-    cursor: pointer;
+.about-footer a {
+  color: #00ff66;
 }
 
-.line {
-    width: 100%;
-    height: 4px; /* Increased thickness */
-    background-color: #ffffff;
-    transition: all 0.3s ease;
-    z-index: 2; /* Stay on top */
-    border-radius: 3px; /* Rounded edges */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
-}
+/* =====================
+   RESPONSIVE
+===================== */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 25px;
+  }
 
-.hamburger:hover .line {
-    background-color: #555;
-}
+  .about-header h1 {
+    font-size: 28px;
+  }
 
-.hamburger.active .line:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-}
+  .subtitle {
+    font-size: 16px;
+  }
 
-.hamburger.active .line:nth-child(2) {
-    opacity: 0;
-}
-
-.hamburger.active .line:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
+  .author-pic img {
+    width: 120px;
+    height: 120px;
+  }
 }

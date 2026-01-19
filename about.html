@@ -1,44 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Me</title>
-  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
-  <link rel="stylesheet" href="about.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Me | Holden Weber</title>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico" />
+  <link rel="stylesheet" href="about.css" />
+  <link rel="stylesheet" href="hamburger.css" />
 </head>
+
 <body>
-  <div id="mySidenav" class="sidenav">
+ <div id="mySidenav" class="sidenav">
     <a href="index.html">Home</a>
     <a href="Blog.html">Blog</a>
     <a href="about.html">About Me</a>
     <a href="Holden_Weber_Resume.html">Resume</a>
   </div>
 
-  <!-- Use any element to open the sidenav -->
+  <!-- Hamburger -->
   <span onclick="openNav()">
     <div class="hamburger">
       <div class="line"></div>
       <div class="line"></div>
       <div class="line"></div>
-  </div>
-  </span>
-  <main>
-    <header>
-      <h1>About Me</h1>
-    </header>
-    <div class="author-pic">
-      <img src="your_picture.jpg" alt="Holden Weber">
     </div>
-    <section>
-      <p>Hello, my name is Holden Weber. I am self-motivated, hardworking, and passionate about all things IT. In my free time, I work away at new certifications and on my home network/server closet. Outside the professional area, you can find me hiking, playing guitar, and playing video games. I believe in the power of self-discipline and I’m always seeking new opportunities to grow.</p>
-      <!-- Coffee Widget --><script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="holdenweber" data-color="#FFDD00" data-emoji="☕"  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
-    </section> 
-    <footer>
-        <p>Email: Holden@HoldenWeber.com</p>
-        <p><a href="https://www.linkedin.com/in/holden-weber/"</a>LinkedIn <a href="https://github.com/ipconfig2"</a>| GitHub</p>
+  </span>
+
+  <!-- Main Content -->
+  <main class="container">
+
+    <!-- Header -->
+    <header class="about-header">
+      <h1>About Me</h1>
+      <p class="subtitle">Network Administrator • IT Enthusiast • Home Lab Builder</p>
+    </header>
+
+    <!-- Profile Image -->
+    <div class="author-pic">
+      <img src="your_picture.jpg" alt="Holden Weber" />
+    </div>
+
+    <!-- About Text -->
+    <section class="about-text">
+      <p>
+        Hello, my name is <strong>Holden Weber</strong>. I am self-motivated, hardworking,
+        and passionate about all things IT. In my free time, I work on new certifications
+        or improving my home network and server environment. Outside of technology, I enjoy
+        hiking, playing guitar, and gaming. I strongly believe in self-discipline and
+        continuous growth.
+      </p>
+
+      <!-- Quick Facts -->
+      <ul class="quick-facts">
+        <li>Network Administrator</li>
+        <li>AAS – Computer Network & Systems Administration</li>
+        <li>Certifications: JNCIA • CCNA • Network+ • Linux+ • A+ • AZ-900 • AZ-104</li>
+        <li>Home Lab, Automation, & Networking Projects</li>
+      </ul>
+
+      <!-- Buy Me a Coffee -->
+      <div class="coffee-btn">
+        <script
+          type="text/javascript"
+          src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+          data-name="bmc-button"
+          data-slug="holdenweber"
+          data-color="#FFDD00"
+          data-emoji="☕"
+          data-font="Cookie"
+          data-text="Buy me a coffee"
+          data-outline-color="#000000"
+          data-font-color="#000000"
+          data-coffee-color="#ffffff">
+        </script>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="about-footer">
+      <p>Email: <a href="mailto:HoldenWeber38@gmail.com">HoldenWeber38@gmail.com</a></p>
+      <p>
+        <a href="https://www.linkedin.com/in/holden-weber/" target="_blank">LinkedIn</a> |
+        <a href="https://github.com/ipconfig2" target="_blank">GitHub</a>
+      </p>
     </footer>
+
   </main>
-   <script src="myscripts.js"></script>
+  <script src="myscripts.js"></script>
+
 </body>
 </html>

@@ -6,8 +6,11 @@
   <title>Blog</title>
   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
   <link rel="stylesheet" href="Blog.css">
+  <link rel="stylesheet" href="hamburger.css">
 </head>
 <body>
+
+  <!-- Side navigation -->
   <div id="mySidenav" class="sidenav">
     <a href="index.html">Home</a>
     <a href="Blog.html">Blog</a>
@@ -15,58 +18,87 @@
     <a href="Holden_Weber_Resume.html">Resume</a>
   </div>
 
-  <!-- Use any element to open the sidenav -->
-  <span onclick="openNav()">
-    <div class="hamburger">
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
-    </div>
-  </span>
-  
-  <div class="content">
-    <h1>Blog Posts</h1>
-    <section>
-      <h2><a href="SQL.html">SQL Database Management for a Medical System</a></h2>
-      <p1><em>10/11/2024</em></p1>
-      <p>This SQL project outlines the creation of a relational database designed to manage critical data for a medical practice. It includes tables for physicians, patients, visits, and payments, along with automated procedures for adding, updating, and tracking data. This system is built to improve data accessibility and streamline medical practice management by automating tasks like balance updates and salary tracking.</p>
-    </section>
-    <section>
-      <h2><a href="WirelessLinux.html">Wireless Linux LAN</a></h2>
-      <p1><em>09/13/2024</em></p1>
-      <p>This project examines wireless monitoring tools for Linux, including Aircrack-ng, Fern WiFi Cracker, Kismet, and DOSBox. The guide covers installation and implementation for each tool to audit, monitor, and secure wireless networks effectively.</p>
-    </section>
-    <section>
-      <h2><a href="VPN_Essay.html">VPN Essay</a></h2>
-      <p1><em>04/29/2024</em></p1>
-      <p> How VPNs (Virtual Private Networks) work, reasons to use a VPN, compare & contrast hardware versus software VPNs, different types of VPNs, and VPN protocols.</p>
-    </section>
-    <section>
-      <h2><a href="ZabbixSNMP.html">Zabbix SNMP Project</a></h2>
-      <p1><em>03/20/2024</em></p1>
-      <p>This project explores setting up SNMP monitoring with Zabbix. It covers SNMP protocol basics, a comparison of monitoring tools, and step-by-step instructions for installing Zabbix on a virtual machine, focusing on network management and secure monitoring through SNMP v3.</p>
-    </section>
-    <section>
-      <h2><a href="Movie_API_Blog.html">Movie Ranker</a></h2>
-      <p1><em>03/14/2024</em></p1>
-      <p>Discover and rank movies effortlessly with Movie Ranker. Explore handpicked films, get key details, and enjoy AI-generated summaries. Dark theme for a cinematic experience.</p>
-    </section>
-    <section>
-      <h2><a href="Bash_Blog.html">My First Bash Script</a></h2>
-      <p1><em>02/25/2024</em></p1>
-      <p>A bash-based CLI tool that allows users to quickly upload files to an Azure cloud storage solution, providing a simple and seamless upload experience similar to popular storage services.</p>
-    </section>
-      <section>
-  <h2><a href="AnswerFileBlog.html">Automating Windows Installation with Answer Files</a></h2>
-  <p1><em>02/19/2024</em></p1>
-  <p>This guide covers the creation of answer files to automate Windows installation and imaging processes. It includes step-by-step instructions for automating a basic Windows 10 installation as well as advanced disk partitioning and image deployment for cloning setups.</p>
-</section>
-    <section>
-      <h2><a href="BuildLAN.html">Build LAN Project</a></h2>
-      <p1><em>10/24/2023</em></p1>
-      <p>This project involves designing and implementing a local area network (LAN) for the 10th floor financial department. It includes network architecture, switch selection, fiber patch panels, power solutions, and the necessary rack and equipment recommendations to ensure a stable, redundant, and secure network setup.</p>
-    </section>
-    <script src="myscripts.js"></script>
+  <!-- Hamburger icon -->
+  <div class="hamburger" onclick="openNav()">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
   </div>
+
+  <!-- Page heading -->
+  <header>
+    <h1>Blog Posts</h1>
+  </header>
+
+  <!-- Blog posts container -->
+  <main class="posts-container">
+
+    <div class="post-card">
+      <img src="https://learn.microsoft.com/en-us/sql/tools/sql-database-projects/media/sql-database-projects/project-files.png?view=sql-server-ver17" alt="SQL Database" class="post-image">
+      <h2><a href="SQL.html">SQL Database Management for a Medical System</a></h2>
+      <span class="date">10/11/2024</span>
+      <p class="excerpt">Build a relational database to manage patients, physicians, visits, and payments with automation for smoother workflow.</p>
+      <a href="SQL.html" class="read-more">Read More →</a>
+    </div>
+
+    <div class="post-card">
+      <img src="https://www.linux.com/images/stories/66866/jack_wifi_a.png" alt="Wireless Linux" class="post-image">
+      <h2><a href="WirelessLinux.html">Wireless Linux LAN</a></h2>
+      <span class="date">09/13/2024</span>
+      <p class="excerpt">Learn how to monitor and secure wireless networks on Linux using Aircrack-ng, Kismet, and Fern WiFi Cracker.</p>
+      <a href="WirelessLinux.html" class="read-more">Read More →</a>
+    </div>
+
+    <div class="post-card">
+      <img src="https://eventussecurity.com/wp-content/uploads/2024/05/How-does-VPN-work-01.webp" alt="VPN" class="post-image">
+      <h2><a href="VPN_Essay.html">VPN Essay</a></h2>
+      <span class="date">04/29/2024</span>
+      <p class="excerpt">Explore how VPNs work, their protocols, and the difference between hardware and software VPN solutions.</p>
+      <a href="VPN_Essay.html" class="read-more">Read More →</a>
+    </div>
+
+    <div class="post-card">
+      <img src="https://www.whitecloudsecurity.com/docs/monitoring/img/zabbix.png" alt="Zabbix SNMP" class="post-image">
+      <h2><a href="ZabbixSNMP.html">Zabbix SNMP Project</a></h2>
+      <span class="date">03/20/2024</span>
+      <p class="excerpt">Step-by-step SNMP monitoring setup in Zabbix, including secure monitoring with SNMP v3 for network management.</p>
+      <a href="ZabbixSNMP.html" class="read-more">Read More →</a>
+    </div>
+
+    <div class="post-card">
+      <img src="https://holdenweber.com/Movie_Ranker.png" alt="Movie Ranker" class="post-image">
+      <h2><a href="Movie_API_Blog.html">Movie Ranker</a></h2>
+      <span class="date">03/14/2024</span>
+      <p class="excerpt">Discover, rank, and read AI-generated summaries of your favorite movies with a cinematic dark-themed interface.</p>
+      <a href="Movie_API_Blog.html" class="read-more">Read More →</a>
+    </div>
+
+    <div class="post-card">
+      <img src="https://cdn.mos.cms.futurecdn.net/4HKuBM87S3dKVkot2V2f2J-1200-80.jpg" alt="Bash Script" class="post-image">
+      <h2><a href="Bash_Blog.html">My First Bash Script</a></h2>
+      <span class="date">02/25/2024</span>
+      <p class="excerpt">Create a Bash CLI tool to upload files to Azure cloud storage quickly and efficiently.</p>
+      <a href="Bash_Blog.html" class="read-more">Read More →</a>
+    </div>
+
+    <div class="post-card">
+      <img src="https://rmprepusb.com/rmprep/132/971d51dbe6ccd46ac50440342222eee4.jpg" alt="Windows Answer Files" class="post-image">
+      <h2><a href="AnswerFileBlog.html">Automating Windows Installation with Answer Files</a></h2>
+      <span class="date">02/19/2024</span>
+      <p class="excerpt">Automate Windows installations with answer files for smooth deployments and disk partitioning setups.</p>
+      <a href="AnswerFileBlog.html" class="read-more">Read More →</a>
+    </div>
+
+    <div class="post-card">
+      <img src="https://cdn.networklessons.com/wp-content/uploads/2016/10/enterprise-lan-two-buildings.png" alt="LAN Build" class="post-image">
+      <h2><a href="BuildLAN.html">Build LAN Project</a></h2>
+      <span class="date">10/24/2023</span>
+      <p class="excerpt">Design and implement a secure LAN for a financial department, including network architecture, switches, and racks.</p>
+      <a href="BuildLAN.html" class="read-more">Read More →</a>
+    </div>
+
+  </main>
+
+  <script src="myscripts.js"></script>
 </body>
 </html>
