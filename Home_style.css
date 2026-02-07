@@ -107,6 +107,19 @@ body {
   box-shadow: 0 4px 12px rgba(97, 166, 97, 0.15);
 }
 
+.ad a {
+  color: #90ee90; /* Light Green */
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.ad a:hover {
+  color: #c1ffc1; /* Even lighter green on hover */
+  text-decoration: underline;
+}
+
+
 /* =====================
    Explore Button
 ===================== */
