@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreePBX Multi-Site Homelab: SIP Trunks, Extensions, and Advanced Setup</title>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="Blog_Post.css">
+  <!-- Social Embed -->
+<meta property="og:title" content="Holden Weber – IT Blog">
+<meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+<meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+<meta property="og:url" content="https://holdenweber.com/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+
+</head>
+<body>
+  <div id="mySidenav" class="sidenav">
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="Holden_Weber_Resume.html">Resume</a>
+  </div>
+
+  <span onclick="openNav()">
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </span>
+<body>
+<header>
+    <h1>FreePBX Multi-Site Homelab: SIP Trunks, Extensions, and Advanced Setup</h1>
+  </header>
+<body>
+<main>
+<section>
+      <h2>Introduction</h2>
+      <p>We wanted to build a phone system in our homelabs. Each of us set up a FreePBX server, purchased a VoIP phone, and configured trunks between our servers to make it work. This setup simulates internal phone calling, with plans to add external calling in the future.</p>
+    </section>
+
+    <section>
+      <h2>FreePBX Installation</h2>
+      <p>There are two ways you can install FreePBX. One with using their ISO file found here: <a href="https://www.freepbx.org/downloads/">https://www.freepbx.org/downloads/</a></p>
+      <p>The other way is to install it on top of Debian 12. We will go over how to do it both ways.</p>
+
+      <article>
+        <h3>ISO Install</h3>
+        <p>The easiest and most “plug-and-play” way to get FreePBX running is by using the official FreePBX ISO. This method installs a minimal, hardened Linux OS with Asterisk and FreePBX preconfigured, making it ideal for dedicated hardware or a VM.</p>
+        <p>Start by downloading the latest FreePBX ISO from the official site and attach it to your physical server or virtual machine. Boot from the ISO and follow the on-screen installer. Most environments can safely use the default options.</p>
+        <p>During installation, you’ll be prompted to:</p>
+        <ul>
+          <li>Select your time zone</li>
+          <li>Configure basic network settings (DHCP or static IP)</li>
+          <li>Set the root password (Do this before clicking next or you could be locked out of your PBX cmd shell)</li>
+        </ul>
+        <p>Once the installer finishes, remove the ISO and reboot the system. After boot, FreePBX will display the management IP address on the console.</p>
+        <p>From another machine on the network, open a browser and navigate to:</p>
+        <p><code>http://&lt;FreePBX-IP-address&gt;</code></p>
+        <p>You’ll then be guided through the initial web-based setup, including:</p>
+        <ul>
+          <li>Creating the FreePBX admin account</li>
+          <li>Setting system credentials</li>
+          <li>Applying initial module updates</li>
+        </ul>
+        <p>This method is best suited for production or lab environments where FreePBX will be the primary role of the system, as it provides a clean, purpose-built PBX with minimal setup effort.</p>
+      </article>
+
+      <article>
+        <h3>Debian Install</h3>
+        <blockquote>
+          <p><strong>Important:</strong> At the time of writing, the official install script does <strong>not</strong> support newer Debian versions.</p>
+        </blockquote>
+
+        <h3>Step 1 — Install Debian</h3>
+        <p>Install <strong>Debian 12 (Bookworm)</strong> with a minimal install.<br>You can do this on:</p>
+        <ul>
+          <li>Proxmox VM</li>
+          <li>Other hypervisor</li>
+          <li>Physical hardware</li>
+        </ul>
+
+        <h3>Step 2 — Switch to Root</h3>
+        <p>The installer must be run as the root user:</p>
+        <pre><code class="language-bash">sudo su
+        </code></pre>
+
+        <h3>Step 3 — Download and Run the FreePBX Installer</h3>
+        <p>FreePBX provides an automated install script.</p>
+        <p>Run the following commands:</p>
+        <pre><code class="language-bash">cd /tmp
+wget https://github.com/FreePBX/sng_freepbx_debian_install/raw/master/sng_freepbx_debian_install.sh -O sng_freepbx_debian_install.sh
+bash sng_freepbx_debian_install.sh
+        </code></pre>
+        <blockquote>
+          <p><strong>Tip:</strong> This process can take quite a while depending on your system resources.</p>
+        </blockquote>
+
+        <h3>Step 4 — Complete Initial Setup</h3>
+        <p>Once the script finishes, open your browser and navigate to:</p>
+        <pre><code>http://&lt;FreePBX-IP-address&gt;
+        </code></pre>
+        <p>Follow the on-screen prompts to complete the initial configuration.</p>
+        <p>At this point, your FreePBX instance should be fully installed and ready for configuration.</p>
+      </article>
+    </section>
+
+    <section>
+      <h2>Creating an Extension</h2>
+      <p>Extensions are what allow phones, softphones, or SIP devices to register to FreePBX and make or receive calls. Each user or device typically gets its own extension.</p>
+      <p>To create an extension, log into the FreePBX web interface and navigate to:</p>
+      <p><strong>Connectivity → Extensions</strong></p>
+      <p>Click <strong>Add Extension</strong> and select <strong>Add New SIP [chan_pjsip] Extension</strong> (recommended for most setups).</p>
+      <p>At a minimum, you’ll need to configure the following:</p>
+      <ul>
+        <li><strong>User Extension</strong> – The extension number (e.g., <code>1001</code>)</li>
+        <li><strong>Display Name</strong> – A friendly name for the user or device</li>
+        <li><strong>Secret</strong> – The SIP password used by the phone or softphone</li>
+      </ul>
+      <p>Scroll down and review the remaining options. In most cases, the defaults are fine for a basic setup.</p>
+      <p>Once finished, click <strong>Submit</strong>, then <strong>Apply Config</strong> at the top of the page.</p>
+      <p>After the extension is created, use the extension number, SIP server IP, and secret to register a physical phone or softphone (such as Zoiper, Linphone, or a desk phone). If registration is successful, the extension should show as <strong>Available</strong> in the FreePBX dashboard.</p>
+      <p>This process can be repeated for each user or device that needs access to the PBX.</p>
+    </section>
+
+    <section>
+      <h2>Voicemail Setup</h2>
+      <p>Voicemail allows users to receive messages when they are unavailable. Setting it up in FreePBX is straightforward, but it’s important to make sure the PIN matches between the extension and the phone if you plan to access voicemail directly from the handset.</p>
+
+      <h3>Enabling Voicemail for an Extension (Optional)</h3>
+      <ol>
+        <li><p>Log into the FreePBX web interface.</p></li>
+        <li><p>Navigate to: <code>Connectivity → Extensions</code></p></li>
+        <li><p>Select the extension you want to enable voicemail for.</p></li>
+        <li><p>Scroll down to the <strong>Voicemail</strong> section.</p></li>
+        <li><p>Check <strong>Enable Voicemail</strong>.</p></li>
+        <li><p>Set a <strong>Voicemail Password / PIN</strong> (4–10 digits). This is what users will enter when checking messages from their phone.</p></li>
+        <li><p>Optionally, configure <strong>Email Notification</strong>:</p>
+          <ul>
+            <li>Enter the user’s email to receive voicemail notifications.</li>
+            <li>Choose whether to attach the message as a <code>.wav</code> file.</li>
+          </ul>
+        </li>
+        <li><p>Click <strong>Submit</strong> and then <strong>Apply Config</strong> at the top.</p></li>
+      </ol>
+
+      <h3>Accessing Voicemail from the Phone</h3>
+      <ul>
+        <li>Dial the <strong>voicemail access code</strong> (usually <code>*97</code> by default).</li>
+        <li>Enter the voicemail PIN.</li>
+        <li>Follow the prompts to listen to, save, or delete messages.</li>
+      </ul>
+
+      <p><strong>Tips:</strong></p>
+      <ul>
+        <li>Make sure the voicemail PIN on the phone matches the PIN set in FreePBX; otherwise, access will fail.</li>
+        <li>You can change the voicemail greeting from the phone or the FreePBX web interface.</li>
+        <li>If using email notifications, confirm your FreePBX server can send emails (SMTP configured correctly).</li>
+      </ul>
+      <p>Voicemail adds a simple but powerful layer of functionality, ensuring that no call goes unanswered even when extensions are unavailable.</p>
+    </section>
+<section>
+  <h2>Mapping Extension to Sangoma S505</h2>
+  <p>After creating the extension in FreePBX, you need to configure the Sangoma S505 so it can register with the PBX and make/receive calls.</p>
+
+  <article>
+    <h3>Manual Configuration</h3>
+    <ol>
+      <li>Find the phone’s IP address on your network (check the screen or use your router’s DHCP table).</li>
+      <li>Open a web browser and navigate to the phone’s IP address.</li>
+      <li>Log in as the administrator.</li>
+      <li>Enter the SIP account details from the extension you created:
+        <ul>
+          <li><strong>Username / Extension</strong> – Your extension number (e.g., <code>1001</code>)</li>
+          <li><strong>Authentication ID</strong> – Your extension number</li>
+          <li><strong>Password / Secret</strong> – The extension secret</li>
+          <li><strong>SIP Server / Proxy</strong> – The FreePBX server IP address</li>
+        </ul>
+      </li>
+      <li>Save the configuration and reboot the phone.</li>
+    </ol>
+    <p>Once the phone restarts, it should register to FreePBX and appear as <strong>Available</strong> in the dashboard. The extension is now ready to make and receive calls.</p>
+    <p><strong>Tips:</strong></p>
+    <ul>
+      <li>Ensure the phone and FreePBX are on the same LAN, or configure proper NAT/firewall rules if remote.</li>
+      <li>Double-check the extension secret if registration fails.</li>
+      <li>If enabling voicemail, make sure the PIN on the phone matches the PIN configured for the extension in FreePBX.</li>
+      <li>Verify the SIP port (usually <code>5060</code>) is not blocked by the network.</li>
+    </ul>
+  </article>
+</section>
+
+<section>
+  <h2>Creating Trunk Connections Between PBX Servers</h2>
+  <p>This assumes:</p>
+  <ul>
+    <li>Both FreePBX servers are already installed and reachable over the network (VPN, site-to-site tunnel, or public IP).</li>
+    <li>You know the IP address of the remote PBX.</li>
+  </ul>
+
+  <article>
+    <h3>Step 1 — Create the Trunk on PBX #1</h3>
+    <ol>
+      <li>Log into the FreePBX Web UI.</li>
+      <li>Navigate to:</li>
+    </ol>
+    <pre><code>Connectivity → Trunks
+    </code></pre>
+    <ol start="3">
+      <li>Click <strong>Add Trunk</strong> → <strong>Add SIP (chan_pjsip) Trunk</strong></li>
+    </ol>
+
+    <h3>Step 2 — Configure the General Settings</h3>
+    <p>Give the trunk a recognizable name:</p>
+    <pre><code>Trunk Name: PBX2
+    </code></pre>
+
+    <h3>Step 3 — Configure the PJSIP Settings</h3>
+    <p>Under the <strong>pjsip Settings</strong> tab:</p>
+    <p><strong>General</strong></p>
+    <pre><code>Authentication: None (or Outbound if using credentials)
+Registration: None
+SIP Server: &lt;PBX2-IP-Address&gt;
+SIP Server Port: 5060
+    </code></pre>
+    <p><strong>Advanced</strong></p>
+    <pre><code>Match (Permit): &lt;PBX2-IP-Address&gt;
+    </code></pre>
+    <p>This allows calls from the remote PBX.</p>
+
+    <h3>Step 4 — Repeat on PBX #2</h3>
+    <p>Repeat the same process on the second FreePBX server:</p>
+    <pre><code>Connectivity → Trunks → Add SIP (chan_pjsip)
+    </code></pre>
+    <p>Set:</p>
+    <pre><code>Trunk Name: PBX1
+SIP Server: &lt;PBX1-IP-Address&gt;
+Match (Permit): &lt;PBX1-IP-Address&gt;
+Authentication: None
+Registration: None
+    </code></pre>
+    <p>Apply Config after saving.</p>
+
+    <h3>Step 5 — Create Outbound Routes</h3>
+    <p>To allow extensions to dial the other PBX:</p>
+    <ol>
+      <li>Navigate to:</li>
+    </ol>
+    <pre><code>Connectivity → Outbound Routes
+    </code></pre>
+    <ol start="2">
+      <li>Create a new route.</li>
+    </ol>
+    <p>Example:</p>
+    <pre><code>Route Name: To-PBX2
+Dial Patterns: 3XXX
+Trunk Sequence: PBX2
+    </code></pre>
+    <p>This means any extension dialing 3XXX will route across the trunk.</p>
+    <p>Repeat on PBX #2 if needed.</p>
+
+    <h3>Step 6 — Test the Connection</h3>
+    <p>From an extension on PBX #1:</p>
+    <ul>
+      <li>Dial an extension on PBX #2 that matches the route pattern.</li>
+    </ul>
+    <p>If configured correctly:</p>
+    <ul>
+      <li>The call should complete immediately.</li>
+      <li>Audio should flow both directions.</li>
+    </ul>
+  </article>
+</section>
+
+<section>
+  <h2>Debugging SIP Trunks</h2>
+  <p>Once your SIP trunks are set up between multiple FreePBX servers, it’s common to run into issues like calls not connecting, audio problems, or registration failures. FreePBX and Asterisk provide several commands and logs that make troubleshooting much easier.</p>
+
+  <article>
+    <h3>Useful Commands</h3>
+    <pre><code>tcpdump -i eth0 -n -s 0 -w sip-trunk.pcap port 5060 or portrange 10000-20000
+pjsip show registrations
+pjsip show endpoints
+core show channels
+    </code></pre>
+
+    <h3>Fixing 30-Second Timeout Issue</h3>
+    <p>A common issue with SIP phones like the Sangoma S505 is calls dropping or failing after about 30 seconds. This usually happens when <strong>NAT settings</strong> or <strong>SIP session timers</strong> are misconfigured.</p>
+    <p><strong>Steps to fix:</strong></p>
+    <ol>
+      <li><p><strong>Check NAT Settings in FreePBX</strong></p>
+        <ul>
+          <li>Navigate to <strong>Settings → Asterisk SIP Settings</strong>.</li>
+          <li>Under the <strong>General SIP Settings</strong>, make sure:
+            <ul>
+              <li><strong>External Address</strong> is set to your public IP (if behind NAT).</li>
+              <li><strong>Local Networks</strong> includes your LAN subnet (e.g., <code>192.168.1.0/24</code>).</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><p><strong>Adjust SIP Timers</strong></p>
+        <ul>
+          <li>In <strong>Asterisk SIP Settings</strong>, look for <strong>SIP Timers / Session Timers</strong>:
+            <ul>
+              <li>Enable <strong>Session Timers</strong>.</li>
+              <li>Set the session expiration to around <code>180</code> seconds (default is usually fine, but sometimes devices need longer).</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><p><strong>Configure Phone Keep-Alives</strong></p>
+        <ul>
+          <li>On the Sangoma S505, enable <strong>SIP OPTIONS Ping</strong> or <strong>Keep Alive</strong>.</li>
+          <li>This ensures the phone sends regular signals to FreePBX to keep the session active.</li>
+        </ul>
+      </li>
+      <li><p><strong>Firewall / NAT Considerations</strong></p>
+        <ul>
+          <li>Make sure UDP port <code>5060</code> (or the port you use for SIP) is open and forwarded correctly if remote.</li>
+          <li>Avoid double NAT if possible, as it can interfere with SIP signaling.</li>
+        </ul>
+      </li>
+    </ol>
+    <p>After making these changes, reboot the phone and test a call. Calls should no longer drop at the 30-second mark.</p>
+    <p><strong>Tip:</strong> This issue almost always comes down to the phone not maintaining a proper NAT mapping with the PBX, so SIP keep-alives and proper external/local network configuration are key.</p>
+  </article>
+</section>
+<section>
+  <h2>Conclusion</h2>
+  <p>By setting up multiple FreePBX servers, configuring extensions, mapping phones like the Sangoma S505, and linking trunks between sites, you can create a fully functional multi-site phone system in your homelab. This setup allows internal calling across different locations and prepares your environment for future expansion to external calling. Proper NAT, SIP timers, and trunk configurations are crucial to maintaining reliable connections and avoiding common issues like dropped calls.</p>
+  <p>With these foundations in place, you can explore additional features such as voicemail notifications, custom dial plans, call queues, and integration with other communication tools. This hands-on approach not only builds a practical homelab but also provides valuable experience in managing real-world VoIP systems.</p>
+</section>
+    </main>
+<script src="myscripts.js"></script>
+  <footer>
+    <p>Author: Holden Weber</p>
+  </footer>
+</body>
+</html>

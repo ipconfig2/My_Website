@@ -2,33 +2,56 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
 /* =====================
+   CSS Variables & Base
+===================== */
+:root {
+  --bg-color: #101410;           /* dark green-black background */
+  --card-bg: #1a241a;            /* post sections */
+  --card-alt-bg: #171f17;        /* alternating sections */
+  --primary-green: #4c7a4c;      /* main accent */
+  --secondary-green: #557755;    /* secondary accent */
+  --light-green: #7a9a7a;        /* hover accent */
+  --text-color: #e0e0e0;         /* primary text */
+  --muted-text: #a8b8a8;         /* muted text */
+  --link-color: #557755;         /* links */
+  --link-hover: #7a9a7a;         /* link hover */
+  --blockquote-bg: #222c22;      /* blockquote background */
+  --border-color: #3a4a3a;       /* subtle borders */
+}
+
+/* =====================
    Reset & Base Styles
 ===================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'Georgia', serif;
   font-size: 18px;
-  line-height: 1.9;
-  margin: 0;
-  padding: 0;
-  background-color: #121912; /* very dark green-black */
-  color: #e0e0e0;
+  line-height: 1.8;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 20px;
   background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
 a {
-  color: #81c784; /* medium green links */
+  color: var(--link-color);
   text-decoration: underline;
   transition: color 0.3s ease;
 }
 
 a:hover, a:focus {
-  color: #a5d6a7; /* lighter green */
+  color: var(--link-hover);
   outline: none;
 }
 
 a:focus {
-  outline: 2px dashed #a5d6a7;
+  outline: 2px dashed var(--link-hover);
   outline-offset: 3px;
 }
 
@@ -36,19 +59,20 @@ a:focus {
    Header
 ===================== */
 header {
-  background-color: #1b5e20;
+  background-color: #1b2e1b;
   color: #ffffff;
   padding: 25px 20px;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  border-radius: 8px;
 }
 
 header h1 {
   margin: 0;
   font-size: 2.5rem;
-  font-weight: normal;
+  font-weight: 700;
   letter-spacing: 1px;
-  color: #a5d6a7;
+  color: var(--primary-green);
   font-family: 'Montserrat', sans-serif;
 }
 
@@ -56,16 +80,16 @@ header h1 {
    Main Content
 ===================== */
 main {
-  max-width: 850px;
+  max-width: 900px;
   margin: 40px auto;
   padding: 40px 35px;
-  background: linear-gradient(to bottom, #1e2c1e 0%, #182218 100%);
-  border-radius: 10px;
+  background: linear-gradient(to bottom, var(--card-bg) 0%, var(--card-alt-bg) 100%);
+  border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 section {
-  background-color: #1e2c1e;
+  background-color: var(--card-bg);
   padding: 25px;
   border-radius: 10px;
   margin-bottom: 30px;
@@ -73,26 +97,29 @@ section {
 }
 
 section:nth-child(even) {
-  background-color: #1b2a1b;
+  background-color: var(--card-alt-bg);
 }
 
+/* =====================
+   Headings
+===================== */
 h2, h3 {
-  color: #66bb6a;
-  margin: 50px 0 20px;
+  color: var(--primary-green);
+  margin: 40px 0 20px;
   font-size: 1.8rem;
   line-height: 1.3;
   font-family: 'Montserrat', sans-serif;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 p {
   margin-bottom: 20px;
-  color: #e0e0e0;
+  color: var(--text-color);
   font-size: 1.1rem;
 }
 
 mark {
-  background-color: #336633;
+  background-color: #2a422a;
   color: #fff;
   padding: 2px 4px;
   border-radius: 3px;
@@ -113,7 +140,7 @@ li {
 
 li::before {
   content: '•';
-  color: #a5d6a7;
+  color: var(--secondary-green);
   display: inline-block;
   width: 1em;
   margin-left: -1em;
@@ -123,12 +150,12 @@ li::before {
    Blockquotes
 ===================== */
 blockquote {
-  border-left: 4px solid #81c784;
+  border-left: 4px solid var(--primary-green);
   padding-left: 15px;
-  color: #cfd8c1;
+  color: var(--muted-text);
   font-style: italic;
   margin: 20px 0;
-  background-color: #2a3a2a;
+  background-color: var(--blockquote-bg);
   border-radius: 5px;
   line-height: 1.7;
 }
@@ -138,7 +165,7 @@ blockquote {
 ===================== */
 img {
   max-width: 100%;
-  border: 1px solid #4caf50;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   margin: 20px 0;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
@@ -155,8 +182,8 @@ img:hover {
    Code & Preformatted Text
 ===================== */
 pre, code {
-  background-color: #263926;
-  color: #a5d6a7;
+  background-color: #1f2a1f;
+  color: var(--secondary-green);
   padding: 4px 6px;
   border-radius: 5px;
   font-family: 'Courier New', monospace;
@@ -183,7 +210,7 @@ pre {
   width: 100%;
   height: 100%;
   min-height: 600px;
-  border: 2px solid #4caf50;
+  border: 2px solid var(--border-color);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   display: block;
@@ -201,7 +228,7 @@ pre {
 .button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #4caf50;
+  background-color: var(--primary-green);
   color: #fff;
   border-radius: 6px;
   text-decoration: none;
@@ -209,7 +236,7 @@ pre {
 }
 
 .button:hover {
-  background-color: #66bb6a;
+  background-color: var(--secondary-green);
 }
 
 /* =====================
