@@ -37,10 +37,7 @@
   </header>
   <main>
     <section>
-        <h1>IPsec at Scale: Hub-and-Spoke Design for NATed Sites</h1>
-
-        <p><strong>Holden Weber, Rene Ruhigita, Connor Horning</strong></p>
-
+       
         <h2>The Problem</h2>
         <p>
         We wanted to connect all our networks, Site Kivu, Site Cleveland, and Site Washington, together to run bigger, wide-scale projects across multiple WAN connections and sites. The goal wasn’t primarily security; it was about achieving high availability, clustering, and being able to manage and test multiple labs as if they were part of a single, unified network. To address the challenges of NAT, dynamic public IP addresses, and SOHO router limitations, we opted for a hub-and-spoke topology. This allowed all remote sites to initiate connections to a central hub with a public IP, simplifying routing, scaling to multiple sites, and keeping the network manageable.

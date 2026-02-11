@@ -11,8 +11,8 @@ body {
   font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
   font-size: 16px;
   line-height: 1.7;
-  color: #e0f0d8;
-  background-color: #081b08; /* slightly darker green for background */
+  color: #222222;            /* main text */
+  background-color: #f9f9f9;  /* light neutral background */
   padding: 20px;
 }
 
@@ -22,7 +22,7 @@ body {
 h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #00ff66;
+  color: #1a73e8; /* professional blue accent */
   margin-bottom: 10px;
   text-align: center;
 }
@@ -30,8 +30,8 @@ h1 {
 h2 {
   font-size: 22px;
   font-weight: 600;
-  color: #00a33f;
-  border-bottom: 2px solid #00a33f;
+  color: #1565c0; /* slightly darker blue */
+  border-bottom: 2px solid #1565c0;
   padding-bottom: 6px;
   margin: 25px 0 15px;
 }
@@ -39,7 +39,7 @@ h2 {
 h3 {
   font-size: 18px;
   font-weight: 500;
-  color: #c7f0d3;
+  color: #555555; /* muted subheading */
   margin-bottom: 8px;
 }
 
@@ -48,7 +48,7 @@ h3 {
 ===================== */
 p, li {
   font-family: inherit;
-  color: #c7f0d3;
+  color: #333333; /* readable text */
 }
 
 ul {
@@ -68,9 +68,9 @@ ul li {
   max-width: 850px;
   margin: 0 auto;
   padding: 35px;
-  background-color: #111; /* dark card for content */
+  background-color: #ffffff; /* neutral card */
   border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
 }
 
 /* =====================
@@ -81,24 +81,24 @@ section {
 }
 
 section ul li strong {
-  color: #00ff66; /* highlight company names or key info */
+  color: #1a73e8; /* highlight important info */
 }
 
 section ul li em {
-  color: #a0f0b0; /* subtle secondary info */
+  color: #777777; /* subtle secondary info */
 }
 
 /* =====================
    LINKS
 ===================== */
 a {
-  color: #00ff66;
+  color: #1a73e8;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 a:hover {
-  color: #ffffff;
+  color: #1565c0;
   text-decoration: underline;
 }
 
@@ -110,7 +110,7 @@ a:hover {
   font-size: 16px;
   font-family: inherit;
   font-weight: 600;
-  background-color: #00a33f;
+  background-color: #1a73e8; /* button accent */
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -118,13 +118,13 @@ a:hover {
   margin: 25px auto 0;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 #downloadButton:hover {
-  background-color: #00ff66;
+  background-color: #1565c0;
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
 }
 
 /* =====================

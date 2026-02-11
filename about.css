@@ -1,6 +1,7 @@
 /* =====================
    GLOBAL RESET & TEXT
 ===================== */
+
 * {
   margin: 0;
   padding: 0;
@@ -11,8 +12,8 @@ body {
   font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
   font-size: 16px;
   line-height: 1.7;
-  color: #e0f0d8;
-  background-color: #081b08; /* dark green background for page */
+  color: #222222;           /* main text color */
+  background-color: #f9f9f9; /* neutral page background */
   padding: 20px;
 }
 
@@ -23,9 +24,9 @@ body {
   max-width: 850px;
   margin: 0 auto;
   padding: 40px;
-  background-color: #111; /* dark content card */
+  background-color: #ffffff; /* card background */
   border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08); /* subtle shadow */
 }
 
 /* =====================
@@ -38,13 +39,13 @@ body {
 
 .about-header h1 {
   font-size: 36px;
-  color: #00ff66;
+  color: #1a73e8; /* professional accent color */
   margin-bottom: 8px;
 }
 
 .subtitle {
   font-size: 18px;
-  color: #a0f0b0;
+  color: #555555; /* muted subtitle */
   font-weight: 500;
 }
 
@@ -53,28 +54,28 @@ body {
 ===================== */
 .author-pic {
   text-align: center;
-  margin: 35px 0; /* spacing above/below */
-  overflow: hidden; /* ensures image doesn’t overflow circular frame */
-  width: 220px;    /* fixed container size */
+  margin: 35px 0;
+  overflow: hidden;
+  width: 220px;
   height: 220px;
-  border-radius: 50%; /* keep it circular */
-  border: 4px solid #00ff66;
+  border-radius: 50%;
+  border: 4px solid #1a73e8; /* accent border */
   margin-left: auto;
   margin-right: auto;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
 .author-pic img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.1); /* zoom in 10% */
+  transform: scale(1.1);
   transition: transform 0.3s ease;
-  border-radius: 50%; /* keep image inside circle */
+  border-radius: 50%;
 }
 
 .author-pic img:hover {
-  transform: scale(1.15); /* zoom slightly more on hover for effect */
+  transform: scale(1.15);
 }
 
 /* Responsive adjustment */
@@ -85,11 +86,9 @@ body {
   }
 
   .author-pic img {
-    transform: scale(1.1); /* keep zoom effect on smaller screens */
+    transform: scale(1.1);
   }
 }
-
-
 
 /* =====================
    ABOUT TEXT
@@ -97,7 +96,7 @@ body {
 .about-text p {
   margin-bottom: 20px;
   font-size: 16px;
-  color: #c7f0d3;
+  color: #333333;
 }
 
 .quick-facts {
@@ -108,7 +107,7 @@ body {
 .quick-facts li {
   margin-bottom: 10px;
   line-height: 1.5;
-  color: #c7f0d3;
+  color: #333333;
 }
 
 /* =====================
@@ -123,13 +122,13 @@ body {
    LINKS
 ===================== */
 a {
-  color: #00ff66;
+  color: #1a73e8;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 a:hover {
-  color: #ffffff;
+  color: #1565c0; /* slightly darker on hover */
   text-decoration: underline;
 }
 
@@ -140,11 +139,11 @@ a:hover {
   margin-top: 40px;
   text-align: center;
   font-size: 14px;
-  color: #a0f0b0;
+  color: #555555;
 }
 
 .about-footer a {
-  color: #00ff66;
+  color: #1a73e8;
 }
 
 /* =====================
