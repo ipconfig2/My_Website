@@ -64,34 +64,36 @@
   <script src="myscripts.js"></script>
 
 <script>
-const namespace = 'holdenweber.com';  // namespace = your domain
-const name = 'homepage';              // counter name
+document.addEventListener('DOMContentLoaded', () => {
+  const namespace = 'holdenweber.com'; // your production domain
+  const name = 'homepage';             // counter name
 
-// find the ad div
-const adDiv = document.querySelector('.ad');
+  const adDiv = document.querySelector('.ad');
+  if (!adDiv) return;
 
-// create a view counter element
-const viewEl = document.createElement('div');
-viewEl.style.color = '#42a5f5';       // blue text
-viewEl.style.marginTop = '8px';
-viewEl.style.fontSize = '0.9rem';
-viewEl.textContent = 'Loading views...';
-adDiv.appendChild(viewEl);
+  // create view counter element
+  const viewEl = document.createElement('div');
+  viewEl.style.color = '#42a5f5';   // blue text
+  viewEl.style.marginTop = '8px';
+  viewEl.style.fontSize = '0.9rem';
+  viewEl.textContent = 'Loading views...';
+  adDiv.appendChild(viewEl);
 
-// hit the CounterAPI up endpoint
-fetch(`https://api.counterapi.dev/v1/${namespace}/${name}/up`)
-  .then(res => res.json())
-  .then(data => {
-    if (data && data.value !== undefined) {
-      viewEl.textContent = `Website Visits: ${data.value}`;
-    } else {
+  // hit CounterAPI up endpoint to increment
+  fetch(`https://api.counterapi.dev/v1/${namespace}/${name}/up`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.count !== undefined) {
+        viewEl.textContent = `Website Visits: ${data.count}`;
+      } else {
+        viewEl.textContent = 'Website Visits: N/A';
+      }
+    })
+    .catch(err => {
+      console.error('CounterAPI error:', err);
       viewEl.textContent = 'Website Visits: N/A';
-    }
-  })
-  .catch(err => {
-    console.error('CounterAPI error:', err);
-    viewEl.textContent = 'Website Visits: N/A';
-  });
+    });
+});
 </script>
 
 </body>
