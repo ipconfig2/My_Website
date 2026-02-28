@@ -65,21 +65,22 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const namespace = 'holdenweber.com'; // your production domain
-  const name = 'homepage';             // counter name
+  const namespace = 'holdenweber.com';
+  const name = 'homepage';
 
   const adDiv = document.querySelector('.ad');
   if (!adDiv) return;
 
-  // create view counter element
-  const viewEl = document.createElement('div');
-  viewEl.style.color = '#42a5f5';   // blue text
-  viewEl.style.marginTop = '8px';
-  viewEl.style.fontSize = '0.9rem';
-  viewEl.textContent = 'Loading views...';
-  adDiv.appendChild(viewEl);
+  // check if counter already exists
+  let viewEl = adDiv.querySelector('.clean-counter');
+  if (!viewEl) {
+    viewEl = document.createElement('div');
+    viewEl.className = 'clean-counter';
+    viewEl.textContent = 'Loading views...';
+    adDiv.appendChild(viewEl);
+  }
 
-  // hit CounterAPI up endpoint to increment
+  // increment and get count from CounterAPI
   fetch(`https://api.counterapi.dev/v1/${namespace}/${name}/up`)
     .then(res => res.json())
     .then(data => {
@@ -96,5 +97,27 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<style>
+/* clean counter matches page style */
+.clean-counter {
+  display: block;
+  background: rgba(30, 78, 140, 0.1); /* light transparent blue */
+  color: #1e4e8c; /* page accent color */
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.clean-counter:hover {
+  background: rgba(30, 78, 140, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+</style>
 </body>
 </html>
