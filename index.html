@@ -65,23 +65,30 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const namespace = 'holdenweber.com';
-  const name = 'homepage';
+  const namespace = 'holdenweber.com'; // your production domain
+  const name = 'homepage';             // counter name
 
   const adDiv = document.querySelector('.ad');
   if (!adDiv) return;
 
-  // create clean view counter badge
+  // create view counter element
   const viewEl = document.createElement('div');
+  viewEl.style.color = '#42a5f5';   // blue text
+  viewEl.style.marginTop = '8px';
+  viewEl.style.fontSize = '0.9rem';
   viewEl.className = 'clean-counter';
   viewEl.textContent = 'Loading views...';
   adDiv.appendChild(viewEl);
 
-  // fetch counter
+  // hit CounterAPI up endpoint to increment
   fetch(`https://api.counterapi.dev/v1/${namespace}/${name}/up`)
     .then(res => res.json())
     .then(data => {
-      viewEl.textContent = `Website Visits: ${data.count !== undefined ? data.count : 'N/A'}`;
+      if (data && data.count !== undefined) {
+        viewEl.textContent = `Website Visits: ${data.count}`;
+      } else {
+        viewEl.textContent = 'Website Visits: N/A';
+      }
     })
     .catch(err => {
       console.error('CounterAPI error:', err);
