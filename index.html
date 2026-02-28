@@ -64,28 +64,33 @@
   <script src="myscripts.js"></script>
 
 <script>
-const namespace = 'holdensblog';
-const key = 'homepage';          
+const namespace = 'holdenweber.com';  // namespace = your domain
+const name = 'homepage';              // counter name
 
-// Select the ad div
+// find the ad div
 const adDiv = document.querySelector('.ad');
 
-// Create a div to hold the view count
-const viewDiv = document.createElement('div');
-viewDiv.style.color = '#42a5f5';
-viewDiv.style.marginTop = '5px';
-viewDiv.style.fontSize = '0.9rem';
-viewDiv.textContent = 'Website Visits: 0';
-adDiv.appendChild(viewDiv);
+// create a view counter element
+const viewEl = document.createElement('div');
+viewEl.style.color = '#42a5f5';       // blue text
+viewEl.style.marginTop = '8px';
+viewEl.style.fontSize = '0.9rem';
+viewEl.textContent = 'Loading views...';
+adDiv.appendChild(viewEl);
 
-// Increment the counter on page load
-fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+// hit the CounterAPI up endpoint
+fetch(`https://api.counterapi.dev/v1/${namespace}/${name}/up`)
   .then(res => res.json())
   .then(data => {
-    viewDiv.textContent = `Website Visits: ${data.value}`;
+    if (data && data.value !== undefined) {
+      viewEl.textContent = `Website Visits: ${data.value}`;
+    } else {
+      viewEl.textContent = 'Website Visits: N/A';
+    }
   })
   .catch(err => {
-    console.error('CountAPI error:', err);
+    console.error('CounterAPI error:', err);
+    viewEl.textContent = 'Website Visits: N/A';
   });
 </script>
 
