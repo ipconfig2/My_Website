@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering BGP From Peering to Policy</title>
+   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+    <link rel="stylesheet" href="Blog_Post.css">
+    <!-- Social Embed -->
+<meta property="og:title" content="Holden Weber – IT Blog">
+<meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+<meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+<meta property="og:url" content="https://holdenweber.com/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+
+  </head>
+  <body>
+    <div id="mySidenav" class="sidenav">
+      <a href="index.html">Home</a>
+      <a href="Blog.html">Blog</a>
+      <a href="about.html">About Me</a>
+      <a href="Holden_Weber_Resume.html">Resume</a>
+    </div>
+
+    <!-- Use any element to open the sidenav -->
+    <span onclick="openNav()">
+      <div class="hamburger">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </div>
+    </span>
+</head>
+<body>
+<header>
+    <h1>Engineering BGP From Peering to Policy</h1>
+  </header>
+  <Main>
+    <section>
+<div id="doc" class="markdown-body container-fluid"><h2 id="Topology">Topology</h2><p>All routers have a loopback address applied that matches their router name.<br>
+For Example R1 = 1.1.1.1/32</p><p>Interface IPs follow a consistent pattern: x.x.x.(Router Number). For example, on subnet 10.0.0.0/24 between R2 and R8, R2 uses 10.0.0.2/24 and R8 uses 10.0.0.8/24.</p><p><img src="images\Engineering_BGP_From_Peering_to_Policy\Diagram.png" alt=""></p><p>All Subnets and IGP Routing has been pre-configured.
+  </section>
+  <section>
+</p><h1 id="BGP-Foundations">BGP Foundations</h1><h2 id="eBGP-Basic-Setup">eBGP Basic Setup</h2><p>This is a simple eBGP setup using loopback-to-loopback peering, which is common in real networks for stability. By peering over loopbacks instead of physical interfaces, the BGP session stays up even if a single link or interface goes down, as long as there is still a valid path between the routers. Because eBGP neighbors are not directly connected when using loopbacks, a few extra steps are required.</p><h3 id="Key-Requirements">Key Requirements</h3><ul>
+<li>A static route (or an IGP) so each router can reach the <strong>remote loopback</strong></li>
+<li><code>update-source loopback</code> so BGP uses the loopback address</li>
+<li><code>ebgp-multihop</code> since the neighbor is more than one hop away</li>
+</ul>
+<hr><h3>Base Configuration Template</h3><pre><code>enable  
+conf t  
+
+ip route (remote loopback IP) (subnet mask) (next-hop IP)
+
+router bgp (local AS)  
+ neighbor (remote loopback IP) remote-as (remote AS)  
+ neighbor (remote loopback IP) update-source loopback (loopback number)  
+ neighbor (remote loopback IP) ebgp-multihop  
+</code></pre><hr><h3 id="Example-–-R2">Example – R2</h3><pre><code>enable  
+conf t  
+
+ip route 8.8.8.8 255.255.255.255 10.0.1.8  
+
+router bgp 1  
+ neighbor 8.8.8.8 remote-as 2  
+ neighbor 8.8.8.8 update-source loopback 0  
+ neighbor 8.8.8.8 ebgp-multihop  
+</code></pre><hr><h3 id="Why-Each-Line-Matters">Why Each Line Matters</h3><ul>
+<li><strong>Static route</strong> – Allows reachability to the remote loopback before BGP establishes</li>
+<li><strong>remote-as</strong> – Defines the eBGP relationship</li>
+<li><strong>update-source loopback</strong> – Ensures BGP sources from the loopback address</li>
+<li><strong>ebgp-multihop</strong> – Required because the neighbor is not directly connected</li>
+</ul><p><img src="images\Engineering_BGP_From_Peering_to_Policy\eBGP_Basics_R2_Show_ip_BGP_neighbors.png" alt=""></p><ul>
+<li><strong>Session is Established</strong> – The eBGP connection is up and stable</li>
+<li><strong>Different AS numbers</strong> – Confirms this is an eBGP relationship</li>
+<li><strong>Loopback neighbor address</strong> – Shows the session is built using loopbacks, not physical links</li>
+<li><strong>Multihop connection</strong> – The routers are reaching each other across the network</li>
+<li><strong>Routes being exchanged</strong> – Confirms BGP is actively doing its job</li>
+<li><strong>Opens</strong> – Used when the BGP session first comes up to exchange basic information like AS numbers, router IDs, and timer values.</li>
+<li><strong>Notifications</strong> – Sent if an error occurs (such as a mismatch or failure); receiving notifications usually results in the session being reset.</li>
+<li><strong>Updates</strong> – Carry routing information, including new prefixes, changes, and withdrawals.</li>
+<li><strong>Keepalives</strong> – Small, regular messages that keep the session alive and confirm the neighbor is still reachable.</li>
+</section>
+<section>
+</ul><h2 id="iBGP-Basic-Setup">iBGP Basic Setup</h2><p>iBGP is used to exchange BGP routes <strong>within the same autonomous system</strong>. Neighbors in an iBGP relationship share the same AS number and commonly peer using loopback interfaces for stability.</p><p>Because iBGP neighbors are typically not directly connected, loopback-to-loopback peering is preferred. This keeps the session up as long as there is a valid path between routers.</p><hr><h3 id="Base-Configuration-Template1">Base Configuration Template</h3><pre><code>enable  
+conf t  
+
+router bgp (AS)  
+ neighbor (remote loopback IP) remote-as (AS)  
+ neighbor (remote loopback IP) update-source loopback (loopback number)  
+</code></pre><hr><h3 id="Example-–-R21">Example – R2</h3><pre><code>enable  
+conf t  
+
+router bgp 1  
+ neighbor 3.3.3.3 remote-as 1  
+ neighbor 3.3.3.3 update-source loopback 0  
+</code></pre><hr><h3 id="Verification">Verification</h3><p>Below is the output of the <code>show ip bgp neighbors</code> command after successfully establishing an iBGP session. This confirms the neighbors are in an <strong>Established</strong> state and are communicating using loopback addresses.</p><p><img src="images\Engineering_BGP_From_Peering_to_Policy\IBGP_Basic_show_ip_bgp_neighbors.png" alt=""></p><p>When looking at the <code>show ip bgp neighbors</code> output, here’s what stands out in an iBGP session:</p><ul>
+<li><strong>Remote AS matches the local AS</strong> – This confirms it is an internal BGP session.</li>
+<li><strong>Internal link</strong> – The neighbor will be identified as an internal neighbor instead of external.</li>
+</ul><p>When you have lots of BGP neighbors, <code>show ip bgp neighbors</code> can be a mess.<br>
+Use this to see just the neighbors and their states:</p><p><code>show ip bgp neighbors | include (Neighbor is)|(State =)</code></p><p><img src="images\Engineering_BGP_From_Peering_to_Policy\show_ip_bgp_neighbors_include_command.png" alt=""></p><p>Quickly shows which peers are up without scrolling through everything.</p><h3 id="Advertising-Networks-in-BGP">Advertising Networks in BGP</h3><p>When running BGP, you don’t always want to advertise every route in your table. Cisco (and most vendors) let you <strong>specify exactly what networks to advertise</strong> using the <code>network</code> command:</p><p><code>network [network] mask [subnet]</code></p><p>This ensures only the routes you want are sent to your neighbors.</p><p>In this setup, we’ll keep things simple by <strong>redistributing our OSPF routes into BGP</strong>. This way, all the networks your router learns through OSPF, including connected networks and loopbacks, are automatically advertised to your BGP neighbors.</p><p>Example:</p><pre><code>router bgp 1
+  redistribute ospf 1
+</code></pre><p>Once your BGP sessions are configured, you’ll want to quickly see <strong>which neighbors are up</strong> without scrolling through pages of configuration. The go-to command is:</p><p><code>show ip bgp summary</code></p><p><img src="images\Engineering_BGP_From_Peering_to_Policy\sh_ip_bgp_sum.png" alt=""></p><p>This shows:</p><ul>
+<li>Neighbor IP addresses</li>
+<li>AS numbers</li>
+<li>BGP version</li>
+<li>Connection state (Idle/Active/Established)</li>
+<li>Number of prefixes received</li>
+</ul><p>It’s a fast way to check the health of your BGP peerings and see if your advertised networks are actually being shared.</p>
+</section>
+<section>
+<h3 id="Next-Hop-Behavior-from-eBGP-to-iBGP-and-the-Need-for-Next-Hop-Self">Next-Hop Behavior from eBGP to iBGP and the Need for Next-Hop-Self</h3><p>After setting up your <strong>basic eBGP and iBGP peerings</strong>, and telling the eBGP routers what networks you want to advertise, you might notice something frustrating: routes learned via BGP <strong>aren’t showing up in the routing table</strong> on some routers. This is a common gotcha, and the culprit is <strong>next-hop behavior between eBGP and iBGP</strong>.</p><p>Topology:</p><p><img src="images\Engineering_BGP_From_Peering_to_Policy\Diagram.png" alt=""></p><p>When a router learns a route from an external BGP neighbor, it keeps the external neighbor as the next-hop.</p><p>When that route is passed along to internal BGP peers, the router does not automatically change the next-hop.</p><p>So your internal routers receive the route, but they may not actually know how to reach that external next-hop address.</p><p>If the next hop isn’t reachable, the route will <strong>not install into the routing table</strong>.</p><p>The solution is to use <strong><code>next-hop-self</code></strong> on the iBGP session. This forces the router to replace the next hop with its <strong>own IP address</strong>, ensuring the route can install correctly in downstream iBGP routers:</p><ul>
+<li><strong>Without <code>next-hop-self</code></strong>: downstream routers may see routes that are <strong>unreachable</strong>, causing missing entries.</li>
+<li><strong>With <code>next-hop-self</code></strong>: all iBGP peers can reach the advertised next hop, and routes show up correctly.</li>
+</ul><p>Example:</p><pre><code>router bgp 1
+neighbor 3.3.3.3 next-hop-self
+</code></pre><p>Apply this to all iBGP neighbor connections.</p>
+</section>
+<section>
+<h3 id="The-iBGP-Full-MeshSplit-Horizon-Problem">The iBGP Full-Mesh/Split-Horizon Problem</h3><p>After configuring iBGP between your internal routers, you will start to notice a pattern: internal routers that are not directly peered with each an eBGP router will not learn all BGP routes.<br>
+This issue is known as the <strong>iBGP split-horizon rule</strong>.</p><p>Routes learned from one iBGP neighbor are <strong>not advertised to another iBGP neighbor</strong>. Unlike eBGP, iBGP does not modify the AS_PATH attribute inside the autonomous system, so it cannot rely on AS_PATH for loop prevention. To avoid routing loops, iBGP simply does not re-advertise routes learned from other iBGP peers.</p><h4 id="What-This-Means-in-Practice">What This Means in Practice</h4><p>Looking at <strong>AS4</strong> in our topology:</p><ul>
+<li><strong>R5</strong> learns an external route (for example, from R3 in AS1 via eBGP).</li>
+<li>R5 advertises that route to <strong>R10</strong> and <strong>R13</strong> using iBGP.</li>
+</ul><p>Here’s the critical rule:</p><blockquote>
+<p>An iBGP router does <strong>not</strong> advertise routes learned from one iBGP peer to another iBGP peer.</p>
+</blockquote><p>So in this topology:</p><ul>
+<li>R10 learns the route from R5 via iBGP.</li>
+<li>But <strong>R10 will NOT advertise that route to R16</strong>, even though R16 is connected to it.</li>
+<li>Likewise:
+<ul>
+<li>R13 will not advertise the route to R15.</li>
+</ul>
+</li>
+</ul><p>Those downstream routers (R16, R15, R19) would never learn the route unless they have a <strong>direct iBGP session with R5</strong>.</p><hr><h2 id="Why-Full-Mesh-Becomes-a-Problem">Why Full Mesh Becomes a Problem</h2><p>In a full-mesh iBGP design, every router must peer with every other router inside the autonomous system.</p><p>The number of required iBGP sessions is calculated as: <strong>n(n − 1) / 2</strong></p><p>Where <strong>n</strong> is the number of iBGP routers in the AS.</p><p>This means the growth is exponential-like in operational impact:</p><ul>
+<li>3 routers → 3 sessions</li>
+<li>5 routers → 10 sessions</li>
+<li>10 routers → 45 sessions</li>
+<li>20 routers → 190 sessions</li>
+</ul><p>As routers are added, the number of BGP peerings increases rapidly. This results in:</p><ul>
+<li>Increased configuration complexity</li>
+<li>Higher memory and CPU usage</li>
+<li>Greater operational overhead</li>
+<li>More difficult troubleshooting</li>
+</section>
+<section>
+<h2 id="The-Solution-Scaling-iBGP">The Solution: Scaling iBGP</h2><p>To address this scaling problem, two mechanisms were introduced:</p><ul>
+<li><strong>Route Reflectors</strong></li>
+<li><strong>Confederations</strong></li>
+</ul><p>These mechanisms allow routes to propagate throughout the AS <strong>without requiring every router to peer with every other router</strong>, eliminating the need for a full mesh while preserving proper route distribution.</p><h3 id="iBGP-Router-Reflector">iBGP Router Reflector</h3><p>For the configuration of the iBGP Route Reflector, we’ll focus on the <strong>top section of AS4</strong> in the diagram.</p><p><img src="images\Engineering_BGP_From_Peering_to_Policy\RR_AS4_Top_section.png" alt=""></p><h3 id="How-Route-Reflection-Works">How Route Reflection Works</h3><p>Normally:</p><blockquote>
+<p>iBGP routes learned from one iBGP neighbor are NOT advertised to another iBGP neighbor.</p>
+</blockquote><p>With a Route Reflector:</p><blockquote>
+<p>The RR is allowed to advertise iBGP-learned routes to its clients.</p>
+</blockquote><p>This is what makes scaling possible.</p><hr><h3 id="Example-Configurations">Example Configurations</h3><h4 id="R10-Route-Reflector">R10 (Route Reflector)</h4><p>R10 is acting as a Route Reflector for its clients:</p><pre><code>enable
+conf t
+router bgp 4
+bgp cluster-id 10.10.10.10
+neighbor 16.16.16.16 route-reflector-client
+</code></pre><p>Key points:</p><ul>
+<li><code>bgp cluster-id</code> identifies the reflection cluster</li>
+<li><code>route-reflector-client</code> marks that neighbor as a client</li>
+<li>R10 can now reflect routes between its clients</li>
+</ul><hr><h3 id="R16">R16</h3><pre><code>enable
+conf t
+router bgp 4
+bgp cluster-id 16.16.16.16
+neighbor 19.19.19.19 route-reflector-client
+</code></pre><p>Here, R16 is acting as a Route Reflector for R19.</p><p>This creates another reflection point within AS4.</p><hr><h3 id="R5">R5</h3><pre><code>enable
+conf t
+router bgp 4
+bgp cluster-id 5.5.5.5
+neighbor 10.10.10.10 route-reflector-client
+</code></pre><p>R5 is reflecting routes toward R10 in this section of the topology.</p><hr><h2 id="Why-This-Matters0">Why This Matters</h2><p>Without Route Reflectors:</p><ul>
+<li>R5, R10, R16, and R19 would all need direct iBGP sessions with each other</li>
+<li>The number of sessions grows quickly</li>
+<li>Configuration and troubleshooting become painful</li>
+</ul><p>With Route Reflectors:</p><ul>
+<li>Fewer iBGP sessions</li>
+<li>Controlled route reflection</li>
+<li>Scalable design</li>
+</ul><hr><h2 id="Big-Picture">Big Picture</h2><p>Route Reflectors allow you to:</p><ul>
+<li>Break the full-mesh requirement</li>
+<li>Scale iBGP cleanly</li>
+<li>Ensure routes learned from one client reach other clients</li>
+</ul><p>In larger AS designs, Route Reflectors are not optional; they’re essential.</p><h2 id="Loop-Prevention-in-Route-Reflector-Designs">Loop Prevention in Route Reflector Designs</h2><p>When you break the full-mesh rule, you introduce a new problem:</p><p>If routers are reflecting routes to each other, how do we prevent routing loops inside the same AS?</p><p>Route Reflectors solve this using two special attributes:</p><h3 id="Originator-ID">Originator ID</h3><p>When a Route Reflector reflects a route, it attaches an <strong>Originator ID</strong>.</p><p>This value represents the router that originally injected the route into iBGP.</p><p>If a router sees a reflected route with its own Originator ID, it will drop it.</p><p>This prevents a route from looping back to the router that started it.</p><hr><h3 id="Cluster-ID-and-Cluster-List">Cluster ID and Cluster List</h3><p>Each Route Reflector has a <strong>cluster-id</strong>.</p><p>When a route is reflected, the RR adds its cluster ID to a <strong>cluster list</strong> inside the BGP update.</p><p>If another Route Reflector receives a route and sees its own cluster ID already in the cluster list, it rejects the route.</p><p>This prevents reflection loops between multiple Route Reflectors.</p><p><img src="images\Engineering_BGP_From_Peering_to_Policy\RR_loop_prevention_clust_lists_etc.png" alt=""></p><p>Once you have this down, repeat it for the routers 4, 14, 18, and 17.</p>
+</section>
+<section>
+<h2 id="iBGP-Confederation-R13-and-R15-Example">iBGP Confederation: R13 and R15 Example</h2><p>For routers <strong>R13</strong> and <strong>R15</strong>, we’re using a <strong>BGP Confederation</strong> approach instead of Route Reflectors. While both methods solve iBGP scaling problems, confederations offer a slightly different trade-off that can be useful in certain designs.</p><hr><h3 id="Why-Choose-a-Confederation">Why Choose a Confederation?</h3><ul>
+<li><strong>Stronger Policy Control:</strong> Confederations treat each internal sub-AS like eBGP when peering between sub-ASes. This allows more granular control over path selection, AS path prepending, and filtering between sub-ASes.</li>
+<li><strong>Loop Prevention at the AS Level:</strong> Each sub-AS is tracked in the AS path. Loops can be detected across sub-ASes without relying on route reflection attributes like Cluster ID or Originator ID.</li>
+<li><strong>Avoids Route Reflector Complexity:</strong> In networks with multiple RRs, you must manage clusters and client assignments. Confederations reduce that overhead by using normal BGP rules between sub-ASes.</li>
+</ul><p>In short, confederations are often preferred when you need <strong>more control over internal routing policies</strong> or when you want <strong>eBGP-like behavior inside a single AS</strong> without deploying multiple Route Reflectors.</p><hr><h2 id="Example-Configuration">Example Configuration</h2><h3 id="R13-sub-AS-65444">R13 (sub-AS 65444)</h3><pre><code>router bgp 65444
+bgp confederation identifier 65000
+bgp confederation peers 65445
+neighbor 15.15.15.15 remote-as 65445
+neighbor 15.15.15.15 update-source Loopback0
+neighbor 15.15.15.15 ebgp-multihop 2
+neighbor 5.5.5.5 remote-as 4
+neighbor 5.5.5.5 update-source Loopback0
+neighbor 5.5.5.5 next-hop-self
+neighbor 4.4.4.4 remote-as 4
+neighbor 4.4.4.4 update-source Loopback0
+neighbor 4.4.4.4 next-hop-self
+redistribute ospf 1
+</code></pre><h3 id="R15-sub-AS-65445">R15 (sub-AS 65445)</h3><pre><code>router bgp 65445
+bgp confederation identifier 65000
+bgp confederation peers 65444
+neighbor 13.13.13.13 remote-as 65444
+neighbor 13.13.13.13 update-source Loopback0
+neighbor 13.13.13.13 ebgp-multihop 2
+redistribute ospf 1
+
+</code></pre><h3 id="External-AS-Peers-R4-and-R5">External AS Peers (R4 and R5)</h3><pre><code>R4:
+router bgp 4
+neighbor 13.13.13.13 remote-as 65444
+neighbor 13.13.13.13 update-source Loopback0
+neighbor 13.13.13.13 next-hop-self
+
+R5:
+router bgp 4
+neighbor 13.13.13.13 remote-as 65444
+neighbor 13.13.13.13 update-source Loopback0
+neighbor 13.13.13.13 next-hop-self
+
+</code></pre><hr><h3 id="Show-ip-bgp-R13">Show ip bgp R13</h3><p><img src="images\Engineering_BGP_From_Peering_to_Policy\confedrations_show_ip_bgp_R13.png" alt=""></p><p><strong>Key Points to Notice:</strong></p><p><code>*&gt;</code> – marks the best path selected by BGP for each prefix.</p><p><code>15.15.15.15/32</code> – learned via iBGP from R15 (sub-AS 65445), AS Path shows <code>(65445)</code>.</p><p><code>16.16.16.16/32</code> – learned from eBGP peers, AS Path reflects the external AS.</p><p><code>Next Hop</code> – IP of the neighbor from which the route was learned. next-hop-self ensures iBGP peers see R13 as the next hop.</p><p>Confirms that <strong>OSPF-redistributed networks</strong> are appearing in the BGP table.</p><hr><h3 id="Show-ip-bgp-R5">Show ip bgp R5</h3><p><img src="images\Engineering_BGP_From_Peering_to_Policy\confedrations_show_ip_bgp_R5.png" alt=""></p><p><strong>Key Points to Notice</strong></p><ul>
+<li><code>*&gt;</code> – best path selected by BGP for each network.</li>
+<li><code>15.15.15.15/32</code> – learned via eBGP from R13 (sub-AS 65444).</li>
+<li><strong>AS Path</strong> shows <code>?</code> for internal confederation routes because R5 is external.</li>
+<li><strong>Next Hop</strong> – shows the IP address of the router to reach this network, confirming connectivity.</li>
+<li>Confirms proper iBGP → eBGP propagation and that sub-AS routes are correctly advertised.</li>
+</ul><hr><h2 id="Key-Takeaways">Key Takeaways</h2><ul>
+<li>Confederations divide a large AS into smaller sub-ASes internally, simplifying iBGP scaling while still appearing as a single AS externally.</li>
+<li>They give you <strong>fine-grained policy control</strong> and <strong>loop prevention</strong> at the sub-AS level.</li>
+<li>Compared to Route Reflectors, confederations reduce the need to manage RR clusters and client relationships.</li>
+<li>Use confederations when you want <strong>eBGP-like behavior internally</strong> or need more policy flexibility than RRs provide.</li>
+</section>
+<section>
+<h1 id="Path-Shaping-–-N-WILLA-OMI">Path Shaping – N WILLA OMI</h1><p><strong>N WLLA OMNI</strong> is a quick way to remember the BGP best path selection process.<br>
+When a router has multiple routes to the same NLRI (Network Layer Reachability Information), it walks this list top to bottom.<br>
+The first difference wins.</p><hr><h2 id="The-Decision-Process">The Decision Process</h2>
+<p><strong>N – Next Hop Reachable</strong><br> 
+If the next hop isn’t in the routing table, the path is rejected.</p>
+<p><strong>W – Weight (Highest Wins)</strong><br>
+Cisco-only. Local to the router. Not advertised.</p>
+<p><strong>L – Local Preference (Highest Wins)</strong><br>
+Shared inside the AS. Primary outbound path control tool.</p>
+<p><strong>L – Locally Originated</strong><br>
+Network, aggregate, or redistributed routes are preferred.</p>
+<p><strong>A – AS Path (Shortest Wins)</strong><br>
+Fewer AS hops are better. This is where prepending works.</p>
+<p><strong>O – Origin (Lowest Wins)</strong><br>
+IGP &gt; EGP &gt; Incomplete.</p>
+<p><strong>M – MED (Lowest Wins)</strong><br>
+Used between directly connected ASes with multiple links.</p>
+<p><strong>N – Neighbor Type</strong><br>
+eBGP preferred over iBGP.</p>
+<p><strong>I – IGP Metric (Lowest Wins)</strong><br>
+Lower internal cost to reach the next hop wins.</p>
+<hr><h2 id="Tie-Breakers-If-Still-Equal">Tie-Breakers (If Still Equal)</h2>
+<p>Oldest eBGP path wins</p>
+<p>Lowest Router ID</p>
+<p>Lowest Neighbor IP</p>
+<h2 id="Key-Takeaway">Key Takeaway</h2><p>Path shaping works because you are intentionally manipulating one of these steps.</p><p>If something higher in the list differs, anything below it won’t matter.</p>
+</section>
+<section>
+<h1 id="Weight-vs-Local-Pref">Weight vs Local-Pref</h1><p>When BGP has multiple valid paths to the same destination, it must decide which one to install in the routing table. Two of the earliest (and most powerful) decision factors in Cisco’s BGP best-path algorithm are:</p><ul>
+<li><strong>Weight</strong></li>
+<li><strong>Local Preference (Local-Pref)</strong></li>
+</ul><p>Even though they sound similar, they operate very differently.</p><hr><h2 id="What-is-Weight">What is Weight?</h2><p><strong>Weight</strong> is a Cisco-proprietary attribute used to influence outbound path selection on a single router only.</p><ul>
+<li>Range: <code>0 – 65,535.</code></li>
+<li>Default:
+<ul>
+<li><code>32768</code> for routes locally originated</li>
+<li><code>0</code> for all other routes</li>
+</ul>
+</li>
+<li>Higher is better</li>
+<li>Not advertised to neighbors</li>
+</ul><p>Weight never leaves the router where it is configured.</p><p>That means:</p><p>If you set a higher weight on R11 for a route learned from R12, only <strong>R11</strong> will prefer that path. The rest of the AS will not know about this decision.</p><h3 id="Example0">Example</h3><pre><code>route-map PREFER-R12 permit 10
+set weight 500
+
+router bgp 3
+neighbor 12.12.12.12 route-map PREFER-R12 in
+
+</code></pre><p>Result:</p><ul>
+<li>R11 prefers routes from R12.</li>
+<li>Other routers in AS 3 are unaffected.<br>
+<code>show ip bgp </code></li>
+</ul><p><img src="images\Engineering_BGP_From_Peering_to_Policy\R11_Weight_show_ip_bgp.png" alt=""></p><p>Traceoute:<br>
+<img src="images\Engineering_BGP_From_Peering_to_Policy\R11_Weight_traceroute.png" alt=""></p><hr><h2 id="What-is-Local-Preference">What is Local Preference?</h2><p><strong>Local Preference (Local-Pref)</strong> is a well-known discretionary BGP attribute used to influence outbound path selection across the entire AS.</p><ul>
+<li>Default: <code>100</code></li>
+<li>Higher is better</li>
+<li>Advertised to all iBGP peers</li>
+<li>Not sent to eBGP peers</li>
+</ul><p>Local Preference tells your entire AS:</p><blockquote>
+<p>“If you see this route, prefer this exit point.”</p>
+</blockquote><h3 id="Example1">Example</h3><pre><code>route-map PREFER-R8 permit 10
+set local-preference 200
+
+router bgp 2
+neighbor 8.8.8.8 route-map PREFER-R8 in
+</code></pre><p>Result:</p><ul>
+<li>R6 prefers R8’s path.</li>
+<li>R6 advertises a higher Local-Pref to all iBGP neighbors.</li>
+<li>All routers inside AS 2 now prefer exiting via R8.</li>
+</ul><hr><p>R6 <code> show ip bgp</code></p><p><img src="images\Engineering_BGP_From_Peering_to_Policy\R6_Local_Prefrence_sh_ip_bgp.png" alt=""></p><p>Traceroute:<br>
+<img src="images\Engineering_BGP_From_Peering_to_Policy\R6_Local_Prefrence_traceroute.png" alt=""></p><h2 id="Key-Differences">Key Differences</h2>
+<table style="border-collapse: collapse; width: 60%; text-align: left;"> <thead style="background-color: #f2f2f2;"> <tr> <th style="padding: 8px; border: 1px solid #ddd;">Attribute</th> <th style="padding: 8px; border: 1px solid #ddd;">Weight</th> <th style="padding: 8px; border: 1px solid #ddd;">Local Preference</th> </tr> </thead> <tbody> <tr> <td style="padding: 8px; border: 1px solid #ddd;">Scope</td> <td style="padding: 8px; border: 1px solid #ddd;">Single router only</td> <td style="padding: 8px; border: 1px solid #ddd;">Entire AS</td> </tr> <tr> <td style="padding: 8px; border: 1px solid #ddd;">Propagated?</td> <td style="padding: 8px; border: 1px solid #ddd;">No</td> <td style="padding: 8px; border: 1px solid #ddd;">Yes (within iBGP)</td> </tr> <tr> <td style="padding: 8px; border: 1px solid #ddd;">Default Value</td> <td style="padding: 8px; border: 1px solid #ddd;">0 (32768 if local)</td> <td style="padding: 8px; border: 1px solid #ddd;">100</td> </tr> <tr> <td style="padding: 8px; border: 1px solid #ddd;">Higher or Lower?</td> <td style="padding: 8px; border: 1px solid #ddd;">Higher is preferred</td> <td style="padding: 8px; border: 1px solid #ddd;">Higher is preferred</td> </tr> <tr> <td style="padding: 8px; border: 1px solid #ddd;">Standard?</td> <td style="padding: 8px; border: 1px solid #ddd;">Cisco proprietary</td> <td style="padding: 8px; border: 1px solid #ddd;">Standard BGP attribute</td> </tr> </tbody> </table>
+</section>
+<section>
+<h2 id="AS-Path-prepending">AS-Path prepending</h2><p>After controlling outbound traffic with <strong>Weight</strong> and <strong>Local Preference</strong>, the next question is:</p><blockquote>
+<p>How do we influence <strong>inbound traffic</strong>?</p>
+</blockquote><p>That’s where <strong>AS-Path Prepending</strong> comes in.</p><hr><h2 id="What-is-AS-Path-Prepending">What is AS-Path Prepending?</h2><p>AS-Path Prepending is a BGP technique where you <strong>artificially lengthen your AS path</strong> when advertising routes to a specific neighbor.</p><p>Since one of BGP’s best-path rules is:</p><blockquote>
+<p>Prefer the path with the <strong>shortest AS Path</strong></p>
+</blockquote><p>By making your path look longer, you make it <strong>less attractive</strong> to external networks.</p><hr><h2 id="Why-Use-AS-Path-Prepending">Why Use AS-Path Prepending?</h2><p>You use AS-Path prepending to:</p><ul>
+<li>Influence <strong>how other autonomous systems send traffic to you</strong></li>
+<li>Shift inbound traffic away from one ISP and toward another</li>
+<li>Create backup or secondary link behavior</li>
+</ul><p>Important:</p><ul>
+<li>This only affects <strong>external BGP neighbors</strong></li>
+<li>It does not influence path selection inside your AS (Local Preference handles that)</li>
+</ul><hr><h2 id="Example-Scenario">Example Scenario</h2><p>Your AS 1 connects to:</p><ul>
+<li>ISP-A via R2</li>
+<li>ISP-B via R3</li>
+</ul><p>You want ISP-A to be the preferred inbound path, and ISP-B to act as backup.</p><p>On the ISP-B-facing router, you prepend your AS multiple times:</p><pre><code>route-map PREPEND-ISP-B permit 10
+set as-path prepend 65002 65002 65002 65002 65002 65002 65002
+
+router bgp 1
+neighbor 5.5.5.5 route-map PREPEND-ISP-B out
+
+</code></pre><p>Now, instead of advertising:</p><p><code>1</code></p><p>You advertise:</p><p><code>1 65002 65002 65002 65002 65002 65002 65002</code></p><p>To the outside world, that path looks longer and therefore less desirable.</p><h4 id="Result">Result:</h4><p>R5<br>
+<img src="images\Engineering_BGP_From_Peering_to_Policy\R5_AS_Prepending_show_ip_bgp.png" alt=""></p><p><img src="images\Engineering_BGP_From_Peering_to_Policy\R5_AS_Prepending_traceroute.png" alt=""></p>
+</section>
+<section>
+<h3 id="MED-Multi-Exit-Discriminator-Comparison">MED (Multi-Exit Discriminator) Comparison</h3><p>After understanding <strong>Weight</strong>, <strong>Local Preference</strong>, and <strong>AS-Path Prepending</strong>, the next attribute in the BGP decision process is:</p><p>MED is used to influence <strong>how a neighboring AS sends traffic into your AS when multiple entry points exist</strong>.</p><hr><h2 id="What-is-MED">What is MED?</h2><p>MED is a <strong>non-transitive BGP attribute</strong> that suggests to an external neighbor:</p><blockquote>
+<p>“If you’re going to send traffic to me, prefer this link.”</p>
+</blockquote><p>Unlike Weight and Local Preference:</p><ul>
+<li><strong>Lower MED is preferred</strong></li>
+<li>It is sent to eBGP neighbors</li>
+<li>It is typically compared only when routes come from the same AS</li>
+</ul><p>Default value (Cisco):</p><ul>
+<li><code>0</code> if not set</li>
+</ul><hr><h2 id="When-is-MED-Used">When is MED Used?</h2><p>MED matters when:</p><ul>
+<li>Two autonomous systems connect at multiple points</li>
+<li>The same prefix is advertised from multiple links</li>
+<li>The receiving AS must choose which entry point to use</li>
+</section>
+<section>
+</ul><h1 id="Enterprise-design-discussion">Enterprise design discussion</h1><p>Now that we’ve covered:</p><ul>
+<li>Weight</li>
+<li>Local Preference</li>
+<li>AS-Path Prepending</li>
+<li>MED</li>
+</ul><p>Let’s zoom out and talk about <strong>how this actually applies in an enterprise network design</strong>.</p><p>Because knowing the attributes is one thing.</p><p>Designing with them intentionally is another.</p><hr><h2 id="The-Reality-of-Enterprise-BGP">The Reality of Enterprise BGP</h2><p>Most enterprise networks are:</p><ul>
+<li>Dual-homed to two different ISPs</li>
+<li>Using private AS numbers</li>
+<li>Not trying to influence global internet routing in complex ways</li>
+<li>Focused on stability and predictability</li>
+</ul><p>Your main goals are usually:</p><ul>
+<li>Primary/backup internet</li>
+<li>Load sharing (if supported)</li>
+<li>Deterministic failover</li>
+<li>Simple, explainable policy</li>
+</ul><hr><h2 id="Outbound-Traffic-Control-Leaving-Your-AS">Outbound Traffic Control (Leaving Your AS)</h2><p>Outbound traffic is the part you fully control.</p><p>The best enterprise practice:</p><h3 id="Use-Local-Preference">Use Local Preference</h3><p>Why?</p><ul>
+<li>It affects the entire AS</li>
+<li>It is consistent</li>
+<li>It works cleanly with Route Reflectors or Confederations</li>
+<li>It scales</li>
+</ul><p>Example strategy:</p><ul>
+<li>ISP-A → Local Pref 200 (Primary)</li>
+<li>ISP-B → Local Pref 100 (Backup)</li>
+</ul><p>This guarantees all routers inside your AS prefer ISP-A unless it fails.</p><p>Avoid relying on Weight in production designs because:</p><ul>
+<li>It only affects one router</li>
+<li>It creates inconsistent path decisions</li>
+<li>It does not scale</li>
+</ul><p>Weight is fine for testing.<br>
+Local Preference is for design.</p><hr><h2 id="Inbound-Traffic-Control-Coming-Into-Your-AS">Inbound Traffic Control (Coming Into Your AS)</h2><p>Inbound is harder because:</p><blockquote>
+<p>You do not control remote AS policy.</p>
+</blockquote><p>Enterprise-friendly tools:</p><h3 id="1-AS-Path-Prepending">1. AS-Path Prepending</h3><ul>
+<li>Simple</li>
+<li>Standards-based</li>
+<li>Works across different providers</li>
+</ul><p>Used for:</p><ul>
+<li>Making one ISP less attractive</li>
+<li>Encouraging primary/backup behavior</li>
+</ul><p>But remember:</p><p>It is a suggestion, not a guarantee.</p><hr><h3 id="2-Provider-Specific-Communities-If-Available">2. Provider-Specific Communities (If Available)</h3><p>Some ISPs allow:</p><ul>
+<li>Community strings to manipulate their Local Preference</li>
+<li>Regional preference control</li>
+<li>Traffic engineering options</li>
+</ul><p>This is often more effective than pure AS-Path prepending.</p><hr><h2 id="Where-MED-Fits-In-Enterprise">Where MED Fits (In Enterprise)</h2><p>In most enterprise dual-ISP designs:</p><ul>
+<li>MED is not very useful</li>
+<li>ISPs rarely compare your MED across different providers</li>
+<li>It only works predictably when dual-homed to the same ISP</li>
+</ul><p>So, ina  typical enterprise internet edge:</p><p>MED is usually irrelevant.</p><hr><h2 id="Recommended-Enterprise-Path-Selection-Order">Recommended Enterprise Path Selection Order</h2><p>For a clean, predictable design:</p><h3 id="Outbound-Strategy">Outbound Strategy</h3><ul>
+<li>Use Local Preference</li>
+<li>Keep it simple (Primary = 200, Backup = 100)</li>
+<li>Avoid overly complex route maps</li>
+</ul><h3 id="Inbound-Strategy">Inbound Strategy</h3><ul>
+<li>Use light AS-Path Prepending if Communities are an option</li>
+<li>Avoid excessive prepends</li>
+<li>Document the intent clearly</li>
+</ul><hr><h2 id="Failover-Philosophy">Failover Philosophy</h2><p>Enterprise design should prioritize:</p><ul>
+<li>Deterministic behavior</li>
+<li>Fast convergence</li>
+<li>Clear policy visibility</li>
+</ul><p>If someone looks at your config six months later, they should instantly understand:</p><ul>
+<li>Which link is primary</li>
+<li>Which link is the backup</li>
+<li>Why</li>
+</ul><p>If the answer requires reading 12 route-maps and 5 prefix-lists:</p><p>It’s over-engineered.</p><hr><h2 id="Scaling-Considerations">Scaling Considerations</h2><p>As enterprises grow:</p><ul>
+<li>Add Route Reflectors for iBGP scalability</li>
+<li>Standardize Local Preference policies</li>
+<li>Avoid per-router Weight manipulation</li>
+<li>Use consistent community tagging</li>
+</ul><p>Policy should become <strong>centralized and intentional</strong>, not reactive.</p><hr><h2 id="Design-Takeaway0">Design Takeaway</h2><p>In enterprise BGP:</p><ul>
+<li><strong>Local Preference is your primary outbound control tool</strong></li>
+<li><strong>AS-Path Prepending is your basic inbound influence tool</strong></li>
+<li><strong>MED is situational</strong></li>
+<li><strong>Weight is for testing or temporary overrides</strong></li>
+</ul><p>The goal is not to use every BGP attribute.</p><p>The goal is to build a network that behaves predictably during failure.</p><p>Simple policies win.</p>
+</section>
+<section>
+<h1 id="Policy-Filtering-amp-Security">Policy, Filtering &amp; Security</h1><h3 id="Peer-groups--templates">Peer-groups / templates</h3><p>As BGP deployments grow, repeating the same neighbor configuration over and over becomes inefficient and error-prone.</p><p>That’s where <strong>peer-groups</strong> (Cisco) and <strong>templates</strong> (modern implementations) come in.</p><p>They allow you to apply common settings to multiple neighbors at once.</p><hr><h2 id="Why-Use-Peer-Groups">Why Use Peer-Groups?</h2><p>Without peer-groups:</p><ul>
+<li>Every neighbor requires identical commands typed manually</li>
+<li>Policy changes must be updated neighbor-by-neighbor</li>
+<li>Risk of configuration drift increases</li>
+</ul><p>With peer-groups:</p><ul>
+<li>The shared policy is defined once</li>
+<li>All assigned neighbors inherit the configuration</li>
+<li>Changes scale cleanly</li>
+</ul><hr><h2 id="Basic-Peer-Group-Example">Basic Peer-Group Example</h2><pre><code>router bgp 1
+neighbor IBGP-PEERS peer-group
+neighbor IBGP-PEERS remote-as 1
+neighbor IBGP-PEERS update-source Loopback0
+neighbor IBGP-PEERS next-hop-self
+
+neighbor 10.0.23.2 peer-group IBGP-PEERS
+neighbor 10.0.22.3 peer-group IBGP-PEERS
+
+</code></pre><p>Now both neighbors:</p><ul>
+<li>Share the same remote AS</li>
+<li>Use Loopback0</li>
+<li>Apply next-hop-self</li>
+</ul><p>One change to the peer-group affects all members.</p><hr><h2 id="Templates-Modern-Approach">Templates (Modern Approach)</h2><p>Newer IOS versions use <strong>neighbor templates</strong>, which are more flexible.</p><p>Example:</p><pre><code>router bgp 1
+template peer-policy IBGP-POLICY
+next-hop-self
+route-reflector-client
+
+template peer-session IBGP-SESSION
+remote-as 1
+update-source Loopback0
+
+neighbor 10.0.23.2 inherit peer-session IBGP-SESSION
+neighbor 10.0.22.3 inherit peer-policy IBGP-POLICY
+
+</code></pre><p>This separates:</p><ul>
+<li>Session settings (transport-level)</li>
+<li>Policy settings (routing behavior)</li>
+</ul><p>More modular. More scalable.</p><hr><h2 id="When-They-Matter-Most">When They Matter Most</h2><p>Peer-groups/templates are critical when:</p><ul>
+<li>You have many iBGP neighbors</li>
+<li>You are using Route Reflectors</li>
+<li>You are deploying BGP in data center or ISP environments</li>
+<li>You want clean, standardized configs</li>
+</ul><p>In enterprise networks with only two ISPs, it may not be necessary.</p><p>In larger designs, it becomes essential.</p><hr><h2 id="Design-Takeaway0">Design Takeaway</h2><p>Peer-groups and templates:</p><ul>
+<li>Improve scalability</li>
+<li>Reduce human error</li>
+<li>Standardize policy</li>
+<li>Simplify troubleshooting</li>
+</ul><p>They don’t change how BGP selects paths.</p><p>They change how cleanly you manage BGP at scale.</p>
+</section>
+<section>
+<h1 id="Prefix-filtering">Prefix filtering</h1><p>Prefix filtering is one of the most important security and stability practices in BGP.</p><p>At its core, prefix filtering controls:</p><blockquote>
+<p><strong>Which routes you accept and which routes you advertise.</strong></p>
+</blockquote><p>Without filtering, you risk:</p><ul>
+<li>Accepting incorrect or malicious routes</li>
+<li>Accidentally advertising internal networks</li>
+<li>Causing route leaks</li>
+<li>Impacting global routing stability</li>
+</ul><hr><h2 id="Why-Prefix-Filtering-Matters">Why Prefix Filtering Matters</h2><p>BGP is built on trust.</p><p>If you accept everything from a neighbor, you are trusting them completely.<br>
+If you advertise everything, you may expose routes that should never leave your AS.</p><p>Good design always includes:</p><ul>
+<li>Inbound filtering (what you accept)</li>
+<li>Outbound filtering (what you send)</li>
+</ul><hr><h2 id="Inbound-Prefix-Filtering">Inbound Prefix Filtering</h2><p>Used to control what routes you learn.</p><p>Common enterprise practice:</p><ul>
+<li>Only accept a default route from the ISP</li>
+<li>Or only accept specific public prefixes</li>
+</ul><p>Example:</p><pre><code>ip prefix-list DEFAULT-ONLY permit 0.0.0.0/0
+
+router bgp 1
+neighbor 5.5.5.5 prefix-list DEFAULT-ONLY in
+</code></pre><p>This ensures you only learn the default route — nothing else.</p><hr><h2 id="Outbound-Prefix-Filtering">Outbound Prefix Filtering</h2><p>Used to control what routes you advertise.</p><p>Enterprise best practice:</p><ul>
+<li>Only advertise your own public IP space</li>
+<li>Never advertise internal RFC1918 networks</li>
+<li>Never leak full routing tables to upstream providers</li>
+</ul><p>Example:</p><pre><code>ip prefix-list OUR-PUBLIC permit 198.51.100.50/32
+
+router bgp 1
+neighbor 5.5.5.5 prefix-list OUR-PUBLIC out
+
+</code></pre><p>This ensures only your owned prefix is advertised.</p><hr><h2 id="Maximum-Prefix-Protection">Maximum-Prefix Protection</h2><p>Another protective measure:</p><p>neighbor 5.5.5.5 maximum-prefix 100</p><p>If a neighbor suddenly sends more than 100 routes:</p><ul>
+<li>The session can be shut down</li>
+<li>Prevents accidental full-table leaks</li>
+</ul><p>This protects your router resources.</p><hr><h2 id="Enterprise-Best-Practice">Enterprise Best Practice</h2><p>At a minimum:</p><ul>
+<li>Filter inbound routes</li>
+<li>Filter outbound routes</li>
+<li>Use maximum-prefix limits</li>
+<li>Explicitly define what is allowed (deny everything else)</li>
+</ul><p>Never rely on default behavior.</p><hr><h2 id="Design-Takeaway0">Design Takeaway</h2><p>Prefix filtering is not optional in production BGP.</p><p>It is:</p><ul>
+<li>A security control</li>
+<li>A stability control</li>
+<li>A professional best practice</li>
+</ul><p>Path shaping determines <em>which</em> path is preferred.</p><p>Prefix filtering determines <em>which routes are allowed to exist at all.</em></p>
+</section>
+<section>
+<h1 id="AS-path-filtering">AS-path filtering</h1><p>While prefix filtering controls <strong>what networks</strong> are allowed,<br>
+AS-path filtering controls <strong>who those networks came from</strong>.</p><p>It allows you to make routing decisions based on the <strong>AS_PATH attribute</strong>.</p><hr><h2 id="Why-Use-AS-Path-Filtering">Why Use AS-Path Filtering?</h2><p>AS-path filtering is useful when you want to:</p><ul>
+<li>Block routes transiting through certain ASes</li>
+<li>Prevent accepting your own AS (loop protection)</li>
+<li>Stop routes from specific providers</li>
+<li>Enforce routing policy based on upstream carriers</li>
+</ul><p>It gives you control based on <strong>routing history</strong>, not just the prefix itself.</p><hr><h2 id="Basic-Example">Basic Example</h2><p>AS-path filtering is typically done using:</p><ul>
+<li><code>ip as-path access-list.</code></li>
+<li>Applied via route-map</li>
+</ul><p>Example:</p><pre><code>ip as-path access-list 10 deny 65002
+ip as-path access-list 10 permit .*
+
+route-map FILTER-AS permit 10
+match as-path 10
+
+router bgp 1
+neighbor 5.5.5.5 route-map FILTER-AS in
+
+</code></pre><p>This denies any route that contains AS 65002 anywhere in the path.</p><p>The underscores (<code>_</code>) ensure exact AS matching.</p><hr><h2 id="Preventing-Your-Own-AS-from-Reappearing">Preventing Your Own AS from Reappearing</h2><p>Although BGP has built-in loop prevention, you can explicitly filter:</p><pre><code>ip as-path access-list 20 deny 1
+ip as-path access-list 20 permit .*
+
+</code></pre><p>This drops any route containing your own AS in the path.</p><hr><h2 id="Enterprise-Use-Cases">Enterprise Use Cases</h2><p>In enterprise networks, AS-path filtering is commonly used to:</p><ul>
+<li>Prevent accepting routes from undesirable transit providers</li>
+<li>Enforce “no transit” policies</li>
+<li>Ensure backup ISP paths behave as expected</li>
+<li>Add additional route validation controls</li>
+</ul><p>It is especially useful when combined with:</p><ul>
+<li>Prefix filtering</li>
+<li>Local Preference manipulation</li>
+<li>Community tagging</li>
+</ul><hr><h2 id="Important-Notes">Important Notes</h2><ul>
+<li>AS-path filtering uses regular expressions.</li>
+<li>Order matters.</li>
+<li>Always include a final permit statement if you don’t want to block everything.</li>
+</ul><p>Improper AS-path filters can accidentally drop valid routes.</p><hr><h2 id="Design-Takeaway0">Design Takeaway</h2><ul>
+<li>Prefix filtering = controls <em>what</em> networks</li>
+<li>AS-path filtering = controls <em>where they came from</em></li>
+</ul><p>Used together, they provide strong policy enforcement and reduce the risk of unintended routing behavior.</p>
+</section>
+<section>
+<h1 id="Communities-for-policy">Communities for policy</h1><p>BGP communities are a flexible way to <strong>tag routes</strong> and influence routing decisions, both inside and outside your AS.</p><p>They allow you to implement <strong>routing policies without changing prefixes or AS paths</strong>.</p><hr><h2 id="What-is-a-BGP-Community">What is a BGP Community?</h2><ul>
+<li>A 32-bit value attached to a route</li>
+<li>Can be <strong>well-known</strong> or <strong>private</strong></li>
+<li>Used by routers to apply policies automatically</li>
+<li>Can affect Local Preference, route acceptance, or route advertisement</li>
+</ul><hr><h2 id="Why-Use-Communities">Why Use Communities?</h2><p>Communities allow you to:</p><ul>
+<li>Mark routes for <strong>preferred exit points</strong></li>
+<li>Signal <strong>backup routes</strong> to peers</li>
+<li>Control <strong>route propagation</strong> to other neighbors</li>
+<li>Simplify policy changes across many routes</li>
+</ul><p>They are particularly powerful in <strong>multi-homed enterprise or ISP environments</strong>.</p><hr><h2 id="Example-Tagging-Routes-for-Local-Preference">Example: Tagging Routes for Local Preference</h2><p>Suppose you want ISP-B to prefer certain routes:</p><pre><code>ip community-list 10 permit 1:100
+route-map SET-LOCAL-PREF permit 10
+match community 10
+set local-preference 200
+
+router bgp 1
+neighbor 5.5.5.5 route-map SET-LOCAL-PREF in
+
+</code></pre><p>Routes tagged with <code>1:100</code> get a higher local preference.</p><hr><h2 id="Example-Controlling-Route-Export">Example: Controlling Route Export</h2><pre><code>
+ip community-list 20 permit 1:200
+route-map BLOCK-EXPORT permit 10
+match community 20
+set community no-export
+
+router bgp 1
+neighbor 5.5.5.5 route-map BLOCK-EXPORT out
+
+</code></pre><ul>
+<li>Routes with <code>1:200</code> will <strong>not be advertised beyond the immediate neighbor</strong></li>
+<li>Useful for controlling transit in multi-AS environments</li>
+</ul><hr><h2 id="Design-Takeaway0">Design Takeaway</h2><p>Communities are the “tags” of BGP:</p><ul>
+<li>They <strong>simplify policy enforcement</strong></li>
+<li>They <strong>reduce repetitive configuration</strong></li>
+<li>They <strong>allow predictable behavior</strong> across multiple peers and ISPs</li>
+</ul><p>When combined with Local Preference, AS-path, and prefix filters, communities become a central tool in enterprise BGP policy design.</p>
+</section>
+<section>
+<h1 id="TTL-security">TTL security</h1><p>TTL Security is a simple but effective way to protect BGP sessions from certain attacks.</p><p>It works by <strong>ensuring BGP packets come from directly connected or expected neighbors</strong>.</p><hr><h2 id="How-TTL-Security-Works">How TTL Security Works</h2><ul>
+<li>BGP packets are sent with a <strong>Time-To-Live (TTL) value</strong>.</li>
+<li>Normally, TTL decrements with each hop.</li>
+<li>With TTL security, the router expects BGP packets to arrive with a TTL <strong>high enough to indicate they are only 1 or 2 hops away</strong>.</li>
+<li>If the TTL is too low, the packet is <strong>dropped</strong>.</li>
+</ul><p>This protects against:</p><ul>
+<li><strong>Remote attacks attempting to inject BGP routes</strong></li>
+<li><strong>Spoofed BGP sessions</strong> from non-direct neighbors</li>
+</ul><hr><h2 id="Example0">Example</h2><pre><code>
+router bgp 1
+neighbor 5.5.5.5 remote-as 4
+neighbor 5.5.5.5 ttl-security hops 2
+
+</code></pre><ul>
+<li><code>ttl-security hops 2</code> allows only BGP packets from neighbors up to 2 hops away.</li>
+<li>Packets arriving with TTL lower than expected are discarded.</li>
+</ul><hr><h2 id="Best-Practices0">Best Practices</h2><ul>
+<li>
+<p>Always enable TTL security for <strong>eBGP and iBGP sessions over untrusted networks</strong>.</p>
+</li>
+<li>
+<p>Combine with:</p>
+<ul>
+<li>Prefix filtering</li>
+<li>AS-path filtering</li>
+<li>Peer authentication (MD5)</li>
+</ul>
+</li>
+<li>
+<p>TTL security is <strong>lightweight and low overhead</strong>, but very effective for session hardening.</p>
+</li>
+</ul><hr><h2 id="Design-Takeaway0">Design Takeaway</h2><p>TTL security is a simple measure that <strong>prevents spoofed or distant BGP sessions</strong>.<br>
+In enterprise and ISP networks, it’s part of a <strong>defense-in-depth strategy</strong> for securing BGP.</p>
+</section>
+<section>
+<h1 id="Peer-Authentication">Peer Authentication</h1><p>BGP peer authentication is a critical security measure to ensure that <strong>only trusted neighbors can establish a BGP session</strong>.<br>
+Without it, anyone who can reach your BGP port (TCP 179) could attempt to inject routes into your network.</p><hr><h2 id="How-Peer-Authentication-Works">How Peer Authentication Works</h2><ul>
+<li><strong>Hashing</strong> on the TCP session.</li>
+<li>Both neighbors must configure the <strong>same password</strong>.</li>
+<li>If the password doesn’t match, the session <strong>will not come up</strong>.</li>
+</ul><p>This protects against:</p><ul>
+<li>Unauthorized BGP session establishment</li>
+<li>Accidental or malicious route injection</li>
+<li>Session hijacking attempts</li>
+</ul><hr><h2 id="Example-–-MD5-Authentication-Legacy">Example – MD5 Authentication (Legacy)</h2><pre><code>router bgp 1
+neighbor 5.5.5.5 remote-as 4
+neighbor 5.5.5.5 password BGPSecret123
+
+</code></pre><ul>
+<li>Both sides must use <code>BGPSecret123</code>.</li>
+<li>The password is hashed in transit, not sent in cleartext.</li>
+</ul><hr><h2 id="Example-–-SHA-256-Authentication-Modern1">Example – SHA-256 Authentication (Modern)</h2><p>Some modern BGP implementations support SHA-based authentication:</p><pre><code>key chain BGP-KEYS tcp
+ key 1
+  cryptographic-algorithm hmac-sha-256
+  key-string 68e00c8130947f65f46611ba33f8c72d64dce69466515035e4e6f427630c3491
+
+router bgp 1
+ neighbor 5.5.5.5 remote-as 4
+ neighbor 5.5.5.5 keychain BGP-KEYS
+
+
+</code></pre><ul>
+<li>Uses <strong>SHA-256</strong> instead of MD5 for stronger hashing.</li>
+<li>Both sides must match the password and hash type.</li>
+<li>Provides improved security over legacy MD5 authentication.</li>
+</ul><h2 id="Best-Practices">Best Practices</h2><ul>
+<li>
+<p>Use <strong>SHA-256, unique passwords</strong> for each BGP neighbor.</p>
+</li>
+<li>
+<p>Combine peer authentication with:</p>
+<ul>
+<li><strong>Prefix filtering</strong></li>
+<li><strong>AS-path filtering</strong></li>
+<li><strong>TTL security</strong></li>
+</ul>
+</li>
+<li>
+<p>Rotate passwords periodically if possible.</p>
+</li>
+<li>
+<p>Document all neighbor passwords securely.</p>
+</li>
+</ul><hr><h2 id="Design-Takeaway0">Design Takeaway</h2><p>Peer authentication ensures that only <strong>authorized routers participate</strong> in your BGP topology.<br>
+It’s a <strong>must-have</strong> for production BGP environments, especially over untrusted links or the internet.</p>
+</section>
+<section>
+<h1 id="Conceptual-RPKI">(Conceptual) RPKI</h1><p><strong>RPKI (Resource Public Key Infrastructure)</strong> is a security framework designed to protect BGP routing from <strong>route hijacking and mis-announcements</strong>.</p><p>It allows network operators to <strong>cryptographically verify that an AS is authorized to announce a particular IP prefix</strong>.</p><hr><h2 id="How-RPKI-Works-Conceptually">How RPKI Works Conceptually</h2><ol>
+<li>
+<p><strong>Resource Certificates</strong></p>
+<ul>
+<li>The Regional Internet Registry (RIR) issues a digital certificate to an AS for the IP prefixes it owns.</li>
+</ul>
+</li>
+<li>
+<p><strong>Route Origin Authorizations (ROAs)</strong></p>
+<ul>
+<li>The certificate is used to create an ROA**, specifying which AS is allowed to announce a given prefix.</li>
+</ul>
+</li>
+<li>
+<p><strong>Validation</strong></p>
+<ul>
+<li>Routers or BGP speakers can check incoming routes against ROAs.</li>
+<li>If the AS is <strong>not authorized</strong> for the prefix, the route can be rejected or deprioritized.</li>
+</ul>
+</li>
+</ol><hr><h2 id="Why-It-Matters">Why It Matters</h2><p>Without RPKI:</p><ul>
+<li>Any AS can accidentally or maliciously announce someone else’s prefix.</li>
+<li>This can cause traffic hijacks, outages, or interception.</li>
+</ul><p>With RPKI:</p><ul>
+<li>Only authorized ASes are allowed to originate routes.</li>
+<li>Enhances <strong>routing security</strong> and <strong>trustworthiness</strong>.</li>
+</ul><hr><h2 id="Conceptual-Example">Conceptual Example</h2><ul>
+<li>Your AS: <strong>65000</strong></li>
+<li>Your prefix: <strong>198.51.100.0/24</strong></li>
+<li>ROA: Authorizes AS 65000 to announce 198.51.100.0/24</li>
+</ul><p>If an attacker from AS 65200 announces the same prefix:</p><ul>
+<li>Validation fails</li>
+<li>The route can be rejected by compliant BGP speakers</li>
+</ul><hr><h2 id="Design-Takeaway">Design Takeaway</h2><p>RPKI is about <strong>proactive validation</strong>, not reactive filtering.</p><p>It complements:</p><ul>
+<li>Prefix filtering</li>
+<li>AS-path filtering</li>
+<li>Communities</li>
+</ul><p>It adds <strong>cryptographic trust</strong> to BGP, making internet routing safer and more predictable.</p>
+</section>
+<section>
+<h1 id="Conclusion">Conclusion</h1><p>In conclusion, BGP can seem complicated at first, but it’s really just about making sure your networks talk to each other reliably, and the traffic goes where you want it to. In this lab, we went through setting up eBGP and iBGP, handling next-hop issues, and dealing with the iBGP full-mesh problem using Route Reflectors and Confederations. Each step helps your network stay stable and scalable.</p><p>We also covered the main BGP attributes Weight, Local Preference, AS-Path Prepending, and MED, and how they affect traffic. Weight is for a single router, Local Pref affects the whole AS, AS-Path Prepending helps control inbound traffic, and MED can guide neighbors on which link to use. Knowing how these work means you can control both incoming and outgoing traffic instead of just hoping it works.</p><p>Overall, understanding BGP lets you set up networks that are reliable, scalable, and easy to manage. Once you get the basics down, you can handle bigger networks, multiple ISPs, and more advanced routing setups without things falling apart.</p></div>
+</section>
+</main>
+  <script src="myscripts.js"></script>
+  <footer>
+      <p>Author: Holden Weber</p>
+  </footer>
+  </body>
+  </html>
