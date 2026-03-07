@@ -1,0 +1,181 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Policy Based Routing and Route Maps Under The Hood CCNP Notes</title>
+   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+    <link rel="stylesheet" href="Blog_Post.css">
+    <!-- Social Embed -->
+<meta property="og:title" content="Holden Weber – IT Blog">
+<meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+<meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+<meta property="og:url" content="https://holdenweber.com/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+
+  </head>
+  <body>
+    <div id="mySidenav" class="sidenav">
+      <a href="index.html">Home</a>
+      <a href="Blog.html">Blog</a>
+      <a href="about.html">About Me</a>
+      <a href="Holden_Weber_Resume.html">Resume</a>
+    </div>
+
+    <!-- Use any element to open the sidenav -->
+    <span onclick="openNav()">
+      <div class="hamburger">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </div>
+    </span>
+</head>
+<body>
+<header>
+    <h1>Policy Based Routing and Route Maps Under The Hood CCNP Notes</h1>
+  </header>
+  <Main>
+    <section>
+<div id="doc" class="markdown-body container-fluid"><h2 id="PBR-Purpose">PBR Purpose</h2><p>Policy-Based Routing (PBR) exists to give you control beyond normal destination-based routing. In traditional routing, a router looks only at the destination IP address, checks the routing table, and forwards the packet based on the best match. That works most of the time, but sometimes the “best” path according to the routing table is not the path you actually want traffic to take.</p><hr><h3 id="Override-Destination-Based-Routing">Override Destination-Based Routing</h3><p>PBR allows you to override destination based routing decisions. Instead of forwarding traffic strictly based on the routing table, you can define policies that change how specific traffic is handled. If traffic matches certain criteria, the router can forward it differently than what the routing table would normally dictate.</p><p>Routing protocols focus on metrics and reachability.<br>
+PBR focuses on business intent.</p><hr><h3 id="Policy-Decision-Based-on-Packet-Attributes">Policy Decision Based on Packet Attributes</h3><p>With PBR, forwarding decisions can be based on packet attributes such as:</p><ul>
+<li>Source IP address</li>
+<li>Destination IP address</li>
+<li>Protocol type</li>
+<li>TCP/UDP port numbers</li>
+</ul><p>This means you are not limited to just <strong>where traffic is going</strong> you can also consider:</p><ul>
+<li>Who sent it</li>
+<li>What type of traffic it is</li>
+<li>How important it is</li>
+</ul><p>That flexibility is what makes PBR powerful.</p><hr><h3 id="Used-for-Traffic-Steering-Not-Path-Discovery">Used for Traffic Steering, Not Path Discovery</h3><p>The most important concept is this:</p><blockquote>
+<p>PBR is used for traffic steering not path discovery.</p>
+</blockquote><p>Dynamic routing protocols (OSPF, EIGRP, BGP) are responsible for discovering networks and calculating the best path. PBR does <strong>not</strong> influence how routes are learned or installed in the routing table.</p><p>Instead, PBR operates locally on the router and selectively overrides the routing decision for matched traffic.</p><p>Common use cases:</p><ul>
+<li>Sending VoIP traffic over a low-latency link</li>
+<li>Forcing guest traffic out a secondary ISP</li>
+<li>Directing specific subnets through a firewall or IDS</li>
+</ul><hr><h2 id="PBR-Components">PBR Components</h2><p>To understand Policy-Based Routing (PBR), you need to clearly understand its core building blocks. PBR is not complicated but each component has a specific role.</p><hr><h3 id="1-Access-Control-List-ACL-–-Traffic-Classification">1. Access Control List (ACL) – Traffic Classification</h3><p>The ACL identifies <strong>which traffic</strong> should be evaluated by the policy.</p><p>This is not for filtering or blocking traffic.<br>
+It is used to <strong>match</strong> traffic.</p><p>Examples of what an ACL can match:</p><ul>
+<li>Source IP address</li>
+<li>Destination IP address</li>
+<li>Protocol (TCP, UDP, ICMP)</li>
+<li>Port numbers</li>
+</ul><p>The ACL answers the question:</p><blockquote>
+<p>What traffic are we making a special decision about?</p>
+</blockquote><hr><h3 id="2-Route-Map-–-Policy-Logic">2. Route Map – Policy Logic</h3><p>The route map defines <strong>what action to take</strong> when traffic matches the ACL.</p><p>This is where the actual policy decision happens.</p><p>Common PBR actions include:</p><ul>
+<li>Set next-hop IP address</li>
+<li>Set exit interface</li>
+<li>Set default next-hop</li>
+<li>Set IP precedence / DSCP (in some designs)</li>
+</ul><p>The route map ties the match condition (ACL) to the action (set statement).</p><p>The route map answers the question:</p><blockquote>
+<p>What should happen to this traffic?</p>
+</blockquote><hr><h3 id="3-Interface-Command-–-Where-It-Is-Applied">3. Interface Command – Where It Is Applied</h3><p>PBR is applied inbound on an interface.</p><p>Example logic:</p><ul>
+<li>Packet enters interface</li>
+<li>Route map is evaluated</li>
+<li>If matched → policy action is taken</li>
+<li>If not matched → normal routing occurs</li>
+</ul><p>This is critical:</p><blockquote>
+<p>PBR must be applied to an interface to take effect.</p>
+</blockquote><p>Without applying the route-map to an interface, nothing happens.</p><hr><h3 id="Summary">Summary</h3><p>PBR consists of three main components:</p><ol>
+<li>ACL → identifies traffic</li>
+<li>Route-map → defines action</li>
+<li>Interface command → activates policy</li>
+</ol><p>ACL = Match<br>
+Route-map = Decision<br>
+Interface = Enforcement</p><p>That is the full PBR workflow.</p><h2 id="Route-Map-Behavior">Route Map Behavior</h2><p>Understanding route map behavior is critical for PBR. The logic is sequential and deterministic.</p><hr><h3 id="Sequence-Numbers-Matter">Sequence Numbers Matter</h3><p>Route-maps are processed top-down by sequence number.</p><ul>
+<li>The router checks sequence 10</li>
+<li>If no match, it moves to sequence 20</li>
+<li>Then 30, and so on</li>
+</ul><p>The first matching sequence is applied.<br>
+Once matched, processing stops.</p><p>There is no “best match” logic like routing tables.<br>
+It is strictly first-match wins.</p><hr><h3 id="Match-and-Set-Logic">Match and Set Logic</h3><p>Each route-map entry can contain:</p><ul>
+<li><code>match</code> statements</li>
+<li><code>set</code> statements</li>
+</ul><p>The logic works like this:</p><p>If the match condition is true → apply the set action.<br>
+If the match condition is false → move to the next sequence.</p><p>If a sequence has no <code>match</code> statement, it matches all traffic.</p><hr><h3 id="Implicit-Deny">Implicit Deny</h3><p>Route-maps have an implicit deny at the end.</p><p>If traffic does not match any sequence:</p><ul>
+<li>No policy is applied</li>
+<li>Normal routing table lookup occurs</li>
+</ul><p>In PBR, this does not drop the packet.<br>
+It simply means “do nothing special.”</p><hr><h3 id="Permit-vs-Deny-in-PBR">Permit vs Deny in PBR</h3><p>In PBR specifically:</p><ul>
+<li><code>permit</code> → apply the set action</li>
+<li><code>deny</code> → skip policy and use normal routing</li>
+</ul><p>This is different from ACL behavior, where deny drops traffic.</p><p>For PBR, a deny statement does not drop packets.<br>
+It just prevents policy from being applied.</p><hr><h3 id="Summary1">Summary</h3><p>Route-maps in PBR are:</p><ul>
+<li>Sequential</li>
+<li>First-match wins</li>
+<li>Implicit deny at the end</li>
+<li>Permit = apply policy</li>
+<li>Deny = normal routing</li>
+</ul><h2 id="Core-Set-Actions">Core Set Actions</h2><p>In PBR, the <strong>set</strong> statements define what happens to traffic after it matches the route-map.</p><hr><h3 id="1-set-ip-next-hop">1. set ip next-hop</h3><p>This is the most common PBR action.</p><p>It tells the router to forward matching traffic to a specific next-hop IP address, overriding the routing table decision.</p><p>Example logic:</p><ul>
+<li>Traffic matches ACL</li>
+<li>Route map matches</li>
+<li>Router forwards packet to defined next-hop</li>
+</ul><p>If that next-hop is reachable, it will be used even if the routing table prefers something else.</p><hr><h3 id="2-set-interface">2. set interface</h3><p>This forces traffic out a specific exit interface.</p><p>Instead of specifying a next-hop IP, you specify the outbound interface.</p><p>This is simpler but less flexible than <code>set ip next-hop</code>, and it can cause issues on multi-access networks if not used carefully.</p><hr><h3 id="4-set-ip-precedence--set-dscp-Policy-Use-Cases">4. set ip precedence / set dscp (Policy Use Cases)</h3><p>While not strictly forwarding actions, these can be used alongside PBR to influence QoS handling.</p><p>They modify packet marking rather than the path itself.</p><hr><h2 id="Failover-Behavior-Basic">Failover Behavior (Basic)</h2><p>Understanding failover behavior in PBR is important because <strong>PBR does not automatically provide intelligent failover</strong> like dynamic routing protocols do.</p><p>PBR is policy-driven, not topology aware.</p><hr><h3 id="What-Happens-If-the-Next-Hop-Fails">What Happens If the Next-Hop Fails?</h3><p>If you configure:</p><ul>
+<li><code>set ip next-hop X.X.X.X</code></li>
+</ul><p>The router will attempt to forward matching traffic to that next-hop.</p><p>If the next-hop is unreachable at Layer 3 (no route to it), the router will fall back to normal routing table behavior.</p><p>However, if the next-hop is reachable in the routing table but the path beyond it is broken, PBR will still send traffic there. It does not verify end-to-end reachability.</p><p>This is a common misconception.</p><hr><h3 id="Multiple-Next-Hops">Multiple Next-Hops</h3><p>You can configure multiple next-hops in a single set statement.</p><p>The router will attempt them in order.</p><p>If the first next-hop is unreachable, it will try the next one in the list.</p><p>This provides basic conditional failover.</p><hr><h3 id="set-ip-default-next-hop-Behavior">set ip default next-hop Behavior</h3><p><code>set ip default next-hop</code> behaves differently.</p><p>It is only used if there is no matching route in the routing table.</p><p>If a route exists, even if it is not ideal, the routing table wins.</p><hr><h3 id="PBR-vs-Dynamic-Routing">PBR vs Dynamic Routing</h3><p>Dynamic routing protocols:</p><ul>
+<li>Detect failures</li>
+<li>Recalculate paths</li>
+<li>Converge automatically</li>
+</ul><p>PBR:</p><ul>
+<li>Follows configured policy</li>
+<li>Does not perform path calculation</li>
+<li>Does not track remote path health by default</li>
+</ul><p>PBR is static logic applied to matching traffic.</p><hr><h3 id="Summary2">Summary</h3><p>Basic failover rules:</p><ul>
+<li>If next-hop is unreachable → normal routing may occur</li>
+<li>Multiple next-hops can provide ordered fallback</li>
+<li>No automatic convergence like routing protocols</li>
+</ul><p>PBR enforces policy.</p><p>It does not replace dynamic routing intelligence.</p><h2 id="Verification-Commands">Verification Commands</h2><p>After configuring PBR, it is essential to verify that policies are working as intended. You should focus on commands that show <strong>both the route-map application and the effect on traffic</strong>.</p><hr><h3 id="1-Show-Route-Map-Applied">1. Show Route-Map Applied</h3><p><code>show route-map</code></p><ul>
+<li>Displays all route-maps on the router</li>
+<li>Shows sequence numbers, match criteria, and set actions</li>
+<li>Useful to confirm the policy is correctly configured</li>
+</ul><hr><h3 id="2-Show-IP-Policy">2. Show IP Policy</h3><p><code>show ip policy</code></p><ul>
+<li>Shows which route-maps are applied to which interfaces</li>
+<li>Confirms inbound interface configuration</li>
+</ul><hr><h3 id="3-Show-Access-Lists">3. Show Access-Lists</h3><p><code>show access-lists</code></p><ul>
+<li>Ensures ACLs referenced in the route-map match the intended traffic</li>
+<li>Verifies correct source/destination, protocol, and port numbers</li>
+</ul><hr><h3 id="4-Show-IP-Route--Ping-Tests">4. Show IP Route / Ping Tests</h3><ul>
+<li>Use <code>ping</code> or <code>traceroute</code> to verify traffic follows the expected path</li>
+<li>Use <code>show ip route</code> to understand fallback behavior if PBR fails</li>
+<li>Optional: use extended ping to test from specific source addresses</li>
+</ul><hr><h3 id="5-Debug-Commands-Optional--Lab-Use">5. Debug Commands (Optional / Lab Use)</h3><p><code>debug ip policy</code></p><ul>
+<li>Provides real-time packet processing information</li>
+<li>Only use in labs or controlled environments</li>
+<li>Can overwhelm a production router if used carelessly</li>
+</ul><hr><h2 id="Design-Warnings">Design Warnings</h2><p>When using PBR, there are several important design considerations to avoid issues in production networks. Understanding these warnings can save you from common pitfalls.</p><hr><h3 id="1-PBR-Overrides-Routing-Table">1. PBR Overrides Routing Table</h3><ul>
+<li>PBR takes precedence over normal destination-based routing.</li>
+<li>Misconfigured policies can send traffic down suboptimal paths or even into black holes.</li>
+<li>Always verify ACL matches and next-hop reachability.</li>
+</ul><hr><h3 id="2-Performance-Impact">2. Performance Impact</h3><ul>
+<li>PBR is applied per-packet on ingress.</li>
+<li>High-volume traffic can consume CPU resources.</li>
+<li>Avoid applying complex route-maps on high-throughput interfaces in production unless hardware supports it.</li>
+</ul><hr><h3 id="3-Limited-Scope">3. Limited Scope</h3><ul>
+<li>PBR is ingress-only.</li>
+<li>Does not apply to locally generated traffic unless specifically configured.</li>
+<li>Must be applied per interface no global enforcement.</li>
+</ul><hr><h3 id="4-Failover-Limitations">4. Failover Limitations</h3><ul>
+<li>PBR does not provide dynamic failover.</li>
+<li>If a next-hop is unreachable, traffic may fallback to the routing table or be dropped depending on configuration.</li>
+<li>Multiple next-hops provide basic fallback but do not replace dynamic routing.</li>
+</ul><hr><h3 id="5-Troubleshooting-Complexity">5. Troubleshooting Complexity</h3><ul>
+<li>Misapplied PBR can make troubleshooting difficult because traffic may not follow the routing table.</li>
+<li>Always verify with <code>show ip policy</code>, <code>show route-map</code>, and packet testing (ping/traceroute).</li>
+</ul><hr><h3 id="Summary3">Summary</h3><ul>
+<li>Use PBR <strong>only when necessary</strong> for traffic steering.</li>
+<li>Keep policies simple and clear.</li>
+<li>Always consider performance, scope, and failover limitations.</li>
+</ul><p>PBR is powerful, but with great power comes the need for careful design.</p></div>
+
+</section>
+</main>
+  <script src="myscripts.js"></script>
+  <footer>
+      <p>Author: Holden Weber</p>
+  </footer>
+  </body>
+  </html>
