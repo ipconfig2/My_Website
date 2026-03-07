@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering-Packet-Flow-Control-with-Policy-Based-Routing-and-Basic-IP-SLA</title>
+   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+    <link rel="stylesheet" href="Blog_Post.css">
+    <!-- Social Embed -->
+<meta property="og:title" content="Holden Weber – IT Blog">
+<meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+<meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+<meta property="og:url" content="https://holdenweber.com/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+
+  </head>
+  <body>
+    <div id="mySidenav" class="sidenav">
+      <a href="index.html">Home</a>
+      <a href="Blog.html">Blog</a>
+      <a href="about.html">About Me</a>
+      <a href="Holden_Weber_Resume.html">Resume</a>
+    </div>
+
+    <!-- Use any element to open the sidenav -->
+    <span onclick="openNav()">
+      <div class="hamburger">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </div>
+    </span>
+</head>
+<body>
+<header>
+    <h1>Engineering-Packet-Flow-Control-with-Policy-Based-Routing-and-Basic-IP-SLA</h1>
+  </header>
+  <Main>
+    <section>
+<div id="doc" class="markdown-body container-fluid"><p>All routers have a loopback address applied that matches their router name.<br>
+For Example R1 = 1.1.1.1/32</p><p><img src="images\Engineering_Packet_Flow_Control_with_Policy-Based_Routing_images\Diagram.png" alt=""></p><p>Interface IPs follow a consistent pattern: x.x.x.(Router Number). For example, on subnet 10.0.0.0/24 between R2 and R8, R2 uses 10.0.0.2/24 and R8 uses 10.0.0.8/24.</p><p>All Subnets and IGP Routing has been pre-configured.</p><h2 id="Basic-PBR">Basic PBR</h2><ul>
+<li>Forward traffic from a specific source (e.g., 10.0.0.1 on R2) toward a destination (e.g., R1 → R4) over a <strong>non-default path</strong> (e.g., via R3 instead of R4).</li>
+</ul><h3 id="Example-R2-Configuration0">Example R2 Configuration</h3><p>Force traffic from R1 to go via R3 instead of R4:</p><pre><code>R2&gt; enable
+R2# conf t
+R2(config)# ip access-list standard 1
+R2(config-std-nacl)# permit host 10.0.0.1
+R2(config)# route-map R1toR4 permit 10
+R2(config-route-map)# match ip address 1
+R2(config-route-map)# set ip next-hop 10.0.1.3
+R2(config)# interface g0/0
+R2(config-if)# ip policy route-map R1toR4
+</code></pre><ul>
+<li>Verify that the PBR overrides the normal routing table using:</li>
+</ul><h3 id="1-show-ip-policy">1. <code>show ip policy</code></h3><p><img src="images\Engineering_Packet_Flow_Control_with_Policy-Based_Routing_images\show-ip-policy-R2-source-ip.png" alt=""></p><p><strong>Key Points:</strong></p><ul>
+<li><strong>Route-map applied:</strong> Confirms that <code>R1toR4</code> is applied inbound on interface <code>G0/0</code>.</li>
+<li><strong>Direction:</strong> PBR is always <strong>inbound</strong>.</li>
+<li>If this output were missing the interface or route-map, PBR would not take effect.</li>
+</ul><hr><h3 id="2-show-route-map">2. <code>show route-map</code></h3><p><img src="images\Engineering_Packet_Flow_Control_with_Policy-Based_Routing_images\route-map-R2-source-ip.png" alt=""></p><p><strong>Key Points:</strong></p><ul>
+<li><strong>Sequence 10 exists:</strong> Confirms the route-map has at least one sequence.</li>
+<li><strong>Match statements:</strong> Shows <code>match ip address 1</code> only traffic matching ACL 1 is impacted.</li>
+<li><strong>Set statements:</strong> Shows <code>set ip next-hop 10.0.1.3</code> this is the critical action that overrides the routing table.</li>
+<li>As you can see from the output packets are hitting the Policy routing matches <strong>counter</strong> verifying its working correctly.</li>
+<li><strong>Implicit deny:</strong> Anything not matching sequence 10 will follow normal routing. This explains why traffic from other sources still takes the default path.</li>
+</ul><hr><h3 id="3-traceroute">3. <code>traceroute</code></h3><p><img src="images\Engineering_Packet_Flow_Control_with_Policy-Based_Routing_images\traceroute-source-ip.png" alt=""></p><p><strong>Key Points:</strong></p><ul>
+<li><strong>Traffic steering verified:</strong> The traceroute confirms that packets from 10.0.0.1 are going to the <strong>intended next-hop (R3)</strong> instead of the default R4 path.</li>
+<li><strong>Fallback check:</strong> If PBR did not match or the next-hop was unreachable, the packets would follow the routing table this did not happen, showing the policy is working.</li>
+<li><strong>Use traceroute for path verification:</strong> Shows each hop and confirms the traffic actually follows the overridden path.</li>
+</ul><hr><h3 id="4-Debug-Command">4. Debug Command</h3><p>For lab and troubleshooting purposes, you can use the debug command to see <strong>real-time PBR processing</strong>. This is useful to verify that traffic is matching your route-map and going to the correct next-hop.</p><p><code>debug ip policy</code></p><p><strong>What It Shows:</strong></p><ul>
+<li>Packet hits a PBR-enabled interface</li>
+<li>Whether the route-map sequence is matched</li>
+<li>The next-hop or interface chosen by the PBR policy</li>
+<li>Packets that do not match the policy (they fall back to normal routing)</li>
+</ul><hr><h3 id="Notes">Notes</h3><ul>
+<li>PBR can also match on other attributes such as <strong>protocol</strong>, <strong>destination IP</strong>, or <strong>port numbers</strong>.</li>
+</ul><h2 id="Multiple-Next-Hop-Failover0">Multiple Next-Hop Failover</h2><p>PBR allows you to configure <strong>multiple next-hops</strong> in a single route-map <code>set ip next-hop</code> statement. This provides <strong>basic conditional failover</strong> if the primary next-hop becomes unreachable.</p><hr><h3 id="Example-R2-Configuration">Example R2 Configuration</h3><pre><code>R2&gt; enable
+R2# conf t
+R2(config)# ip access-list standard 1
+R2(config-std-nacl)# permit host 10.0.0.1
+R2(config)# route-map R1toR4 permit 10
+R2(config-route-map)# match ip address 1
+R2(config-route-map)# set ip next-hop 10.0.1.3 10.0.2.4
+R2(config)# interface g0/0
+R2(config-if)# ip policy route-map R1toR4
+</code></pre><ul>
+<li><code>set ip next-hop 10.0.1.3 10.0.2.4</code> → router will attempt <strong>10.0.1.3 first</strong>, and if unreachable, fallback to <strong>10.0.2.4</strong>.</li>
+<li>Only traffic matching ACL 1 (10.0.0.1) is affected.</li>
+<li>Traffic from other sources continues to follow the normal routing table.</li>
+</ul><hr><h3 id="Simulating-Failover">Simulating Failover</h3><ol>
+<li>Shut down the primary next-hop interface (e.g., on R3):</li>
+</ol><pre><code>R2(config)# interface g0/2
+R2(config-if)# shutdown
+</code></pre><ol start="2">
+<li>Verify with <code>traceroute</code> from 10.0.0.1:</li>
+</ol><ul>
+<li>The router now forwards packets to <strong>10.0.2.4</strong> (secondary next-hop).</li>
+<li>Traffic continues without following the default R4 path.</li>
+</ul><hr><h3 id="Important-Behavior-to-Understand">Important Behavior to Understand</h3><p>This failover behavior only works when the <strong>next-hop becomes unreachable from the router’s perspective</strong>.</p><p>In practice, this usually means:</p><ul>
+<li>The <strong>interface toward the next-hop goes down</strong>, or</li>
+<li>The router <strong>no longer has a route to the next-hop IP</strong>.</li>
+</ul><p>If the <strong>neighbor router stays up but its downstream link fails</strong>, and there is still a route to the ip address. In that situation:</p><ul>
+<li>R2 will <strong>continue sending traffic to the primary next-hop</strong>.</li>
+<li>The upstream router (R3) will drop the traffic.</li>
+<li>This results in a <strong>blackhole</strong>.</li>
+</ul><p>This is a very common real-world PBR issue.</p><hr><h3 id="Preventing-Blackholes-IP-SLA">Preventing Blackholes (IP SLA)</h3><p>In production networks, you usually combine PBR with <strong>IP SLA tracking</strong>.</p><p>IP SLA can:</p><ul>
+<li>Actively test reachability to the next-hop or a remote destination</li>
+<li>Withdraw the primary next-hop if the probe fails</li>
+<li>Allow traffic to switch to the backup path automatically</li>
+</ul><p>Without reachability tracking, <strong>PBR has no awareness of downstream failures</strong>.</p><hr><h3 id="IP-SLA-Configuration-on-R2">IP SLA Configuration on R2</h3><pre><code>! Probe for Primary Next-Hop
+ip sla 1
+icmp-echo 10.0.1.3
+frequency 5
+ip sla schedule 1 life forever start-time now
+
+! Probe for Secondary Next-Hop
+ip sla 2
+icmp-echo 10.0.2.4
+frequency 5
+ip sla schedule 2 life forever start-time now
+
+track 10 ip sla 1 reachability
+track 20 ip sla 2 reachability
+</code></pre><ul>
+<li><strong>IP SLA 1</strong> continuously tests reachability to the primary next-hop.</li>
+<li><strong>IP SLA 2</strong> tests the secondary next-hop.</li>
+<li>Tracking objects monitor the success or failure of these probes.</li>
+</ul><h3 id="PBR-with-Next-Hop-Availability-Verification">PBR with Next-Hop Availability Verification</h3><p>Now we update the route-map to reference the tracking objects:</p><pre><code>route-map R1toR4 permit 10
+match ip address 1
+set ip next-hop verify-availability 10.0.1.3 1 track 10
+set ip next-hop verify-availability 10.0.2.4 2 track 20
+</code></pre><ul>
+<li><code>verify-availability</code> tells the router to <strong>check the tracking object before using the next-hop</strong>.</li>
+<li>If <strong>track 10 fails</strong>, the router skips <code>10.0.1.3</code> and uses <code>10.0.2.4</code>.</li>
+<li>If both fail, traffic falls back to normal routing.</li>
+</ul><hr><h2 id="Verification">Verification</h2><p>To verify that <strong>PBR failover with IP SLA tracking</strong> is working, we can compare traceroute output <strong>before and after the primary path fails</strong>.</p><p><img src="images\Engineering_Packet_Flow_Control_with_Policy-Based_Routing_images\before-and-after-shutdown-on-r3-interface-ip-sla.png" alt=""></p><h3 id="Things-to-Notice">Things to Notice</h3><p><strong>Before the Failure</strong></p><ul>
+<li>Traffic leaves <strong>R1</strong> and reaches <strong>R2 (10.0.0.2)</strong> first.</li>
+<li>The next hop is <strong>R3</strong>, which is the <strong>primary next-hop (10.0.1.3)</strong> configured in the route-map.</li>
+<li>This confirms:
+<ul>
+<li>The route-map matched the traffic.</li>
+<li>IP SLA reports the primary next-hop as reachable.</li>
+<li>PBR is overriding the normal routing table.</li>
+</ul>
+</li>
+</ul><p><strong>After the Failure</strong></p><ul>
+<li>The interface toward <strong>R3</strong> is shut down to simulate a path failure.</li>
+<li>IP SLA detects that the <strong>primary next-hop is no longer reachable</strong>.</li>
+<li>The tracking object changes state.</li>
+</ul><p>Now when the traceroute runs again:</p><ul>
+<li>Traffic still reaches <strong>R2 first</strong>.</li>
+<li>Instead of forwarding to <strong>R3</strong>, traffic is redirected to the <strong>secondary next-hop (10.0.2.4)</strong>.</li>
+<li>This confirms the router has <strong>failed over to the backup path</strong>.</li>
+</ul><h2 id="PBR-with-Interface-vs-Next-Hop">PBR with Interface vs. Next-Hop</h2><p>PBR allows you to control forwarding decisions using either a <strong>specific next-hop IP</strong> or by forcing traffic out of a <strong>particular interface</strong>. While both methods can steer traffic, they behave differently and have different design implications.</p><hr><p>Advantages of Next Hop ip:</p><ul>
+<li>Works well on <strong>multi-access networks</strong>.</li>
+<li>Allows <strong>multiple next-hop options</strong>.</li>
+<li>Can be combined with <strong>IP SLA tracking</strong>.</li>
+<li>Provides more predictable forwarding behavior.</li>
+</ul><h3 id="Using-set-interface">Using <code>set interface</code></h3><p>Instead of specifying a next-hop, you can force traffic out an interface.</p><pre><code>route-map R1toR4 permit 10
+match ip address 1
+set interface g0/2
+</code></pre><p>What happens:</p><ul>
+<li>The router sends the packet directly out the specified interface.</li>
+<li>The router must determine the correct Layer 2 destination for that packet.</li>
+</ul><p>This works best on <strong>point-to-point links</strong>.</p><hr><h3 id="Limitations-on-Multi-Access-Networks">Limitations on Multi-Access Networks</h3><p>On Ethernet segments with multiple devices, <code>set interface</code> can cause problems.</p><p>Why:</p><ul>
+<li>The router does not know which <strong>Layer 2 destination</strong> should receive the packet.</li>
+<li>The router may attempt ARP resolution for the <strong>final destination IP</strong> instead of the next-hop router.</li>
+<li>If that destination is not on the local segment, the packet may fail or behave unpredictably.</li>
+</ul><p>Example issue:</p><ul>
+<li>R2 forces traffic out <code>G0/2</code>.</li>g
+<li>The destination network is multiple hops away (R8).</li>
+<li>R2 attempts ARP for the <strong>remote destination</strong>, which will fail.</li>
+</ul><p>This is why Cisco generally recommends using <strong><code>set ip next-hop</code> instead of <code>set interface</code> on Ethernet networks</strong>.</p><hr><h2 id="set-ip-default-next-hop">set ip default next-hop</h2><p><code>set ip default next-hop</code> is a Policy-Based Routing (PBR) command that specifies a next-hop <strong>only if the router does not already have a route in its routing table</strong>.</p><p>This makes it useful when you want PBR to act as a <strong>fallback path</strong> rather than forcing traffic away from the routing table’s decision.</p></div>
+
+</section>
+</main>
+  <script src="myscripts.js"></script>
+  <footer>
+      <p>Author: Holden Weber</p>
+  </footer>
+  </body>
+  </html>
