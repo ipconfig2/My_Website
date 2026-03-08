@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Hosting Your Spotify: A Personal Spotify Analytics Dashboard</title>
+   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+    <link rel="stylesheet" href="Blog_Post.css">
+    <!-- Social Embed -->
+<meta property="og:title" content="Holden Weber – IT Blog">
+<meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+<meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+<meta property="og:url" content="https://holdenweber.com/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+
+  </head>
+  <body>
+    <div id="mySidenav" class="sidenav">
+      <a href="index.html">Home</a>
+      <a href="Blog.html">Blog</a>
+      <a href="about.html">About Me</a>
+      <a href="Holden_Weber_Resume.html">Resume</a>
+    </div>
+
+    <!-- Use any element to open the sidenav -->
+    <span onclick="openNav()">
+      <div class="hamburger">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </div>
+    </span>
+</head>
+<body>
+<header>
+    <h1>Self-Hosting Your Spotify: A Personal Spotify Analytics Dashboard</h1>
+  </header>
+  <Main>
+    <section>
+<div id="doc" class="markdown-body container-fluid"><p>Spotify gives you things like <strong>Spotify Wrapped</strong> once a year, and personally I love looking at listening stats. But what if you could see your listening stats <strong>any time you want</strong>? That’s where <strong>Your Spotify</strong> comes in.</p><p>Your Spotify is a small application that connects to your Spotify account and generates a <strong>personal analytics dashboard</strong>. It shows things like your most played artists, tracks, genres, and listening trends over time. Instead of waiting for Spotify to summarize your year in December, you get a <strong>live view of your music habits</strong> whenever you want.</p><p>The best part is that it’s <strong>fully self-hosted</strong>, so you run it on your own server. In my case, I deployed it in my homelab so I can access my Spotify stats from anywhere.</p><p>Below is what my dashboard looks like after connecting my account.</p><p><img src="images\How_to_Setup_Self_Hosted_Spotify_tracking_with_your_spotify\your-spotify-dashboard.png" alt=""></p><h2 id="Architecture-Docker--Spotify-API">Architecture (Docker + Spotify API)</h2><p>The application itself is pretty simple. <strong>Your Spotify</strong> sits between your browser and the <strong>Spotify Web API</strong> and pulls data from your account to generate the dashboard.</p><p>The stack I’m running looks like this:</p><ul>
+<li><strong>Docker</strong> – Runs the application container</li>
+<li><strong>Spotify Web API</strong> – Provides the listening data</li>
+<li><strong>Web UI</strong> – Displays the dashboard and analytics</li>
+</ul><p>When you log in with your Spotify account, the application uses Spotify’s <strong>OAuth authentication</strong> to request permission to read your listening data. After authentication, the app queries the <strong>Spotify API</strong> for things like your top tracks, artists, and listening history.</p><p>The data is then processed by the application and displayed in the dashboard as charts and stats.</p><p>At a high level the architecture looks like this:</p><p>Browser → Your Spotify Web Client → Your Spotify API → Spotify Web API</p><h2 id="Setup-Guide">Setup Guide</h2><p>Running <strong>Your Spotify</strong> is pretty straightforward once you have a Spotify developer application and a place to host the container. I deployed mine in my homelab using <strong>Docker Compose</strong>.</p><p>One important thing to know before starting: <strong>Spotify now requires HTTPS for redirect URIs</strong>. This means your dashboard must be accessible over HTTPS for the login flow to work. I solved this by exposing my service through a <strong>Cloudflare Tunnel</strong>, which provides a public HTTPS endpoint without needing to open ports on my network.</p><hr><h2 id="1-Create-a-Spotify-Developer-Application">1. Create a Spotify Developer Application</h2><p>First, you need to create an application so the dashboard can access your Spotify listening data.</p><p>Go to the Spotify Developer Dashboard and create a new app.<br>
+<a href="https://developer.spotify.com/" target="_blank" rel="noopener">https://developer.spotify.com/</a></p><p>When creating the app you will receive:</p><ul>
+<li><strong>Client ID</strong></li>
+<li><strong>Client Secret</strong></li>
+</ul><p>You will also need to configure a <strong>Redirect URI</strong>.</p><p>Example redirect URI:</p><p><a href="https://yourspotify.yourdomain.com/oauth/spotify/callback" target="_blank" rel="noopener">https://yourspotify.yourdomain.com/oauth/spotify/callback</a></p><p><img src="images\How_to_Setup_Self_Hosted_Spotify_tracking_with_your_spotify\spotify-for-devs.png" alt=""></p><p>Make sure this URI <strong>exactly matches</strong> what you configure in your application and Docker environment variables.</p><blockquote>
+<p>Spotify requires this redirect URI to use <strong>HTTPS</strong> unless using loopback address.</p>
+</blockquote><hr><h2 id="2-Docker-Compose-Deployment">2. Docker Compose Deployment</h2><p>Below is the <strong>simplified Docker Compose file</strong> I used to run the service. Sensitive values such as secrets and domain names have been removed.</p><pre><code>version: "3"
+
+services:
+ yourspotifyserver:
+    image: yooooomi/your_spotify_server
+    restart: always
+    ports:
+      - "9090:8080"
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    environment:
+      API_ENDPOINT: https://yourspotify.yourdomain.com # This MUST be included as a valid URL in the spotify dashboard (see below)
+      CLIENT_ENDPOINT: https://yourspotifystats.yourdomain.com
+      SPOTIFY_PUBLIC: (id)
+      SPOTIFY_SECRET: (token)
+      CORS: https://yourspotifystats.yourdomain.com,http://localip:9191 # Add this to allow the web client access
+  mongo:
+    container_name: mongo
+    image: mongo:6 # if older CPU image: mongo:4.4.18
+    volumes:
+      - ./your_spotify_db:/data/db
+
+  web:
+    image: yooooomi/your_spotify_client
+    restart: always
+    ports:
+      - "9191:3000"
+    environment:
+      API_ENDPOINT: https://yourspotify.yourdomain.com
+
+</code></pre><p>Start the container with:</p><p><code>docker compose up -d</code></p><p>Once running, the web interface will be available on port <strong>9090</strong>.</p><hr><pre><code>  cloudflared: # If using Cloudflare tunnel like me
+    image: cloudflare/cloudflared:latest
+    restart: always
+    environment:
+      - TUNNEL_TOKEN=
+    command: tunnel --no-autoupdate run
+
+</code></pre><h2 id="3-Exposing-the-Service-with-HTTPS">3. Exposing the Service with HTTPS</h2><p>Since Spotify requires <strong>HTTPS</strong>, you’ll need to expose the service through a secure endpoint.</p><p>There are several ways to do this:</p><ul>
+<li>Reverse proxy with <strong>Nginx or Caddy</strong></li>
+<li><strong>Cloudflare Tunnel</strong></li>
+<li><strong>Traefik</strong></li>
+<li>A traditional public server with TLS</li>
+</ul><p>In my case I used a <strong>Cloudflare Tunnel</strong>, which securely exposes a local service to the internet without opening firewall ports.</p><p>The tunnel points my public hostname to the local container like this:</p><p><a href="http://yourspotify.yourdomain.com" target="_blank" rel="noopener">yourspotify.yourdomain.com</a> → localhost:3000</p><p>Cloudflare automatically provides the <strong>HTTPS certificate</strong>, which satisfies Spotify’s redirect URI requirements.</p><hr><h2 id="4-Logging-In">4. Logging In</h2><p>Once everything is running:</p><ol>
+<li>Open your public HTTPS URL</li>
+<li>Click <strong>Login with Spotify</strong></li>
+<li>Authorize the application</li>
+<li>The dashboard will begin generating your stats</li>
+</ol><p>After logging in, the application starts building your listening analytics dashboard from your Spotify account data. On the first run the application can only pull about one week of listening history, but it will build a larger dataset over time.</p><h2 id="Things-I-Learned">Things I Learned</h2><p>A couple things surprised me while setting this up:</p><ul>
+<li>Spotify now requires HTTPS redirect URIs</li>
+<li>The application builds listening history over time</li>
+<li>Newer MongoDB versions (5+) require CPUs that support AVX instructions. When I first deployed this stack on older hardware the container failed to start. Downgrading the image to MongoDB 4.4 solved the issue since it still supports older CPUs.</li>
+</ul></div>
+</section>
+</main>
+  <script src="myscripts.js"></script>
+  <footer>
+      <p>Author: Holden Weber</p>
+  </footer>
+  </body>
+  </html>
