@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Essentials of Network Address Translation Under the Hood (CCNP Notes)</title>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="Blog_Post.css">
+
+  <!-- Social Embed -->
+  <meta property="og:title" content="Holden Weber – IT Blog">
+  <meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+  <meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+  <meta property="og:url" content="https://holdenweber.com/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+</head>
+<body>
+  <div id="mySidenav" class="sidenav">
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="Holden_Weber_Resume.html">Resume</a>
+  </div>
+
+  <!-- Hamburger Menu -->
+  <span onclick="openNav()">
+    <div class="hamburger" id="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </span>
+
+  <header>
+    <h1>Essentials of Network Address Translation Under the Hood (CCNP Notes)</h1>
+  </header>
+<main>
+<section>
+<div id="doc" class="markdown-body container-fluid"><h2 id="Introduction-to-NAT">Introduction to NAT</h2><p>Network Address Translation (NAT) is a technology that allows a router or firewall to modify IP address information in packet headers as traffic passes through it. This enables devices using private IP addresses inside a network to communicate with external networks such as the internet.</p><p>The primary reason NAT exists is <strong>IPv4 address conservation</strong>. Because public IPv4 addresses are limited, most organizations assign <strong>private address space</strong> to internal devices and translate those addresses to public ones when traffic leaves the network.</p><p>NAT is typically implemented at the <strong>edge of a network</strong>, usually on a router or firewall that connects the internal network to the internet. When an internal host sends traffic externally, the device performing NAT replaces the private source address with a public address. When return traffic arrives, the device uses a translation table to map the traffic back to the correct internal host.</p><h2 id="Types-of-NAT">Types of NAT</h2><h3 id="Static-NAT">Static NAT</h3><p>Static NAT creates a <strong>permanent one-to-one mapping</strong> between a private IP address and a public IP address. The translation is manually configured and does not change.</p><p>This is commonly used for internal servers that must be reachable from external networks. Because the mapping is static, the public address always translates to the same internal host.</p><p>Example idea:</p><p>Private IP → Public IP<br>
+192.168.1.10 → 203.0.113.10</p><h3 id="Dynamic-NAT">Dynamic NAT</h3><p>Dynamic NAT also performs <strong>one-to-one translations</strong>, but the public address is selected from a <strong>pool of available public IP addresses</strong>.</p><p>When an internal device needs to reach an external network, the router assigns it an available public address from the pool. Once the session ends, the address can be reused for another device.</p><p>This allows multiple internal devices to use NAT, but it still requires a <strong>pool of public IP addresses</strong>.</p><h3 id="NAT-Overloading-PAT">NAT Overloading (PAT)</h3><p>NAT Overloading, commonly called <strong>Port Address Translation (PAT)</strong>, allows <strong>many internal devices to share a single public IP address</strong>.</p><p>Instead of only translating the IP address, the router can also modify the <strong>source port number</strong> so it can uniquely identify each connection.</p><p>Important detail: <strong>PAT does not always translate the source port.</strong><br>
+If the original source port is available, the router will keep it the same. The port is only changed if another translation is already using that port on the public address.</p><p>Example concept:</p><p>192.168.1.10:5000 → 203.0.113.5:5000<br>
+192.168.1.11:5000 → 203.0.113.5:30001</p><p>PAT is the <strong>most common form of NAT used today</strong> because it allows thousands of internal devices to access the internet using only a small number of public IP addresses.</p><h2 id="NAT-Matching-and-Translation-Behavior">NAT Matching and Translation Behavior</h2><h3 id="ACLs-Define-What-Gets-NATed">ACLs Define What Gets NATed</h3><p>In many NAT configurations, <strong>access control lists (ACLs)</strong> are used to define which traffic should be translated and which should not. The ACL does not block traffic; it simply <strong>identifies traffic that is eligible for NAT</strong>.</p><p>If traffic matches the ACL, the router applies NAT. If it does not match, the traffic passes through without being translated.</p><p>Because of this behavior, ACL design is important when configuring NAT policies.</p><h2 id="Core-NAT-Address-Terminology">Core NAT Address Terminology</h2><p>Understanding NAT requires knowing how Cisco describes addresses during translation.</p><h3 id="Inside-Local-IL">Inside Local (IL)</h3><p>The <strong>actual IP address assigned to a host on the internal private network</strong>.</p><p>Example:<br>
+192.168.1.10</p><p>This address is used only inside the private network and is typically from RFC1918 address space.</p><h3 id="Inside-Global-IG">Inside Global (IG)</h3><p>The <strong>public IP address that represents the inside host to external networks</strong>.</p><p>Example:<br>
+203.0.113.10</p><p>When NAT occurs, the router replaces the Inside Local address with the Inside Global address before the packet is sent to the internet.</p><h3 id="Outside-Global-OG">Outside Global (OG)</h3><p>The <strong>real public IP address of an external host</strong>.</p><p>Example:<br>
+8.8.8.8 (public DNS server)</p><p>This is the actual address assigned to the external device on the internet.</p><h3 id="Outside-Local-OL">Outside Local (OL)</h3><p>The <strong>address of the outside host as it appears to the internal network</strong>.</p><p>In most NAT scenarios, the <strong>Outside Local and Outside Global addresses are the same</strong>, but they can differ if additional NAT translations are applied.</p><hr><h3 id="Inside-vs-Outside">Inside vs Outside</h3><p><strong>Inside Network</strong><br>
+The private network managed by your organization.</p><p><strong>Outside Network</strong><br>
+The external network, usually the public internet.</p><p>Routers performing NAT must define which interfaces are <strong>inside</strong> and which are <strong>outside</strong> so the router knows where translations should occur.</p><hr><h3 id="Local-vs-Global">Local vs Global</h3><p><strong>Local Address</strong><br>
+An address used internally within a network.</p><p><strong>Global Address</strong><br>
+An address that is visible externally on the public internet.</p><p>These terms are combined to describe how NAT translates addresses as packets move between internal and external networks.</p><h3 id="ACL-Required-to-Match-Traffic">ACL Required to Match Traffic</h3><p>For many NAT configurations, an <strong>ACL is required to match the traffic that should be translated</strong>. The NAT rule references the ACL, and the router uses it to determine which packets should create NAT translations.</p><h3 id="NAT-Timeout-Values">NAT Timeout Values</h3><p>NAT translations are <strong>not permanent</strong> for most traffic. The router keeps entries in the NAT table only while they are active.</p><p>Different protocols have different default timeout values on Cisco routers:</p><ul>
+<li><strong>TCP</strong> – 24 hours (86400 seconds)</li>
+<li><strong>UDP</strong> – 5 minutes (300 seconds)</li>
+<li><strong>ICMP</strong> – 60 seconds</li>
+</ul><p>These timers exist because different protocols behave differently. TCP sessions are stateful and may remain open for long periods of time, while UDP and ICMP traffic are typically short-lived.</p><p>If a session becomes inactive and the timeout expires, the router removes the translation from the NAT table, freeing resources for new connections.</p><h2 id="Verification-Commands">Verification Commands</h2><p>When troubleshooting NAT, Cisco routers provide several commands that allow you to view translations, statistics, and active NAT configurations.</p><h3 id="Show-NAT-Translations">Show NAT Translations</h3><p>This command displays the <strong>current NAT translation table</strong>, showing how internal addresses are mapped to external addresses.</p><p>show ip nat translations</p><p>Example output will show entries such as:</p><p>Inside Local → Inside Global<br>
+192.168.1.10 → 203.0.113.5</p><p>For PAT, you will also see <strong>port translations</strong> included in the output.</p><p>This command is useful for verifying that NAT translations are actually being created.</p><h3 id="Show-NAT-Statistics">Show NAT Statistics</h3><p>This command provides <strong>general information about NAT operation</strong>, including translation counts and hit statistics.</p><p>show ip nat statistics</p><p>Useful information in this output includes:</p><ul>
+<li>Total active translations</li>
+<li>Number of hits and misses</li>
+<li>NAT pool usage</li>
+<li>Interfaces configured for inside and outside NAT</li>
+</ul><p>This helps confirm whether NAT is actively being used on the router.</p><h3 id="Show-Running-Configuration">Show Running Configuration</h3><p>You can also verify NAT configuration directly in the running configuration.</p><p>show running-config | section nat</p><p>This helps confirm:</p><ul>
+<li>NAT rules</li>
+<li>ACLs used for NAT matching</li>
+<li>Inside and outside interface assignments</li>
+</ul><p>Using these commands together makes it easier to confirm that NAT is configured correctly and that translations are being created as expected.</p><h2 id="Conclusion">Conclusion</h2><p>Network Address Translation (NAT) is a fundamental technology used in almost every modern network. While it is often introduced as a simple way to conserve IPv4 addresses, there is more happening under the hood than just replacing one IP address with another.</p><p>Understanding the different types of NAT, how ACLs determine which traffic is translated, and how routers track translations with timers and tables makes troubleshooting much easier. Concepts like <strong>Inside Local</strong>, <strong>Inside Global</strong>, and PAT behavior become especially important when diagnosing connectivity problems.</p><p>From a CCNP perspective, the goal is not just knowing how to configure NAT, but understanding how the router processes and tracks translations internally. Once you understand those mechanics, NAT becomes much easier to reason about when something in the network is not working the way you expect.</p></div>
+</main>
+</section>
+    </main>
+    <footer>
+        <p>Author: Holden Weber</p>
+    </footer>            
+
+  <script src="myscripts.js"></script>
+</body>
+</html>

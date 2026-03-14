@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering Network Address Translation Static, Dynamic, and PAT (CCNP LAB)</title>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="Blog_Post.css">
+  <!-- Social Embed -->
+<meta property="og:title" content="Holden Weber – IT Blog">
+<meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+<meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+<meta property="og:url" content="https://holdenweber.com/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+
+</head>
+<body>
+  <div id="mySidenav" class="sidenav">
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="Holden_Weber_Resume.html">Resume</a>
+  </div>
+
+  <span onclick="openNav()">
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </span>
+<body>
+<header>
+    <h1>Engineering Network Address Translation Static, Dynamic, and PAT (CCNP LAB)</h1>
+  </header>
+  <main>
+    <section>
+<div id="doc" class="markdown-body container-fluid"><h2 id="Lab-Objective">Lab Objective</h2><p>In this lab we will configure the main types of NAT used in real networks:</p><ul>
+<li><strong>Static NAT</strong> – A one-to-one mapping between a private inside address and a public address.</li>
+<li><strong>Dynamic NAT</strong> – Using a pool of public addresses that internal hosts can be translated to.</li>
+<li><strong>NAT Overload (PAT)</strong> – Allowing multiple internal devices to share a single public IP using port translation.</li>
+</ul><p>Once NAT is configured, we will examine the <strong>NAT translation table</strong> to see how the router tracks active translations and how Inside Local and Inside Global addresses appear in real output.</p><p>We will also look at <strong>NAT timeout behavior</strong> to see how translations age out when sessions become inactive.</p><p>Finally, we will use common <strong>verification commands</strong> to confirm that NAT is operating correctly and to see what useful information the router provides when troubleshooting.</p><h2 id="Topology-amp-Base-Configuration">Topology &amp; Base Configuration</h2><p>All routers have a loopback address applied that matches their router name.</p><p>Example:<br>
+R1 = 1.1.1.1/32</p><p><img src="images\Engineering-Network-Address-Translation-Static-Dynamic-and-PAT\diagram.png" alt=""></p><p>Private interface IPs follow a consistent pattern: <code>x.x.x.(Router Number)</code>.<br>
+For example, on subnet <code>10.0.0.0/24</code> between R2 and R8:</p><ul>
+<li>R2 → 10.0.0.2/24</li>
+<li>R8 → 10.0.0.8/24</li>
+</ul><p>Public-facing interfaces use the pattern <code>203.0.0.(Router Number)</code>.</p><p>All subnets and routing (OSPF &amp; eBGP) have been <strong>pre-configured</strong> for this lab.</p><p>To prevent private address space from being redistributed into BGP, a route-map is used during redistribution.</p><pre><code>conf t
+!
+access-list 1 permit 10.0.0.0 0.255.255.255
+access-list 1 permit 172.16.0.0 0.15.255.255
+access-list 1 permit 192.168.0.0 0.0.255.255
+
+route-map no-internal deny 10
+ match ip address 1
+route-map no-internal permit 20
+!
+
+router bgp 10
+ bgp log-neighbor-changes
+ redistribute connected route-map no-internal
+</code></pre><h2 id="Configuring-Static-NAT">Configuring Static NAT</h2><p>The first step in this lab is configuring Static NAT on <strong>R1</strong>. Static NAT creates a <strong>permanent one-to-one mapping</strong> between an internal private address and a public address.</p><p>In this example, R1 will translate the inside host <strong>10.0.1.2</strong> (R2) to the public address <strong>203.0.1.1</strong>.</p><p>First, define which interfaces are <strong>inside</strong> and <strong>outside</strong> for NAT.</p><pre><code>enable
+conf t
+
+int range g0/0 - 1
+ip nat outside
+
+int range g0/2 - 3
+ip nat inside
+</code></pre><p>Next, create the static NAT mapping:<br>
+<code>ip nat inside source static 10.0.1.2 203.0.1.1</code></p><p>This creates the following translation:</p><p>Inside Local → Inside Global<br>
+10.0.1.2 → 203.0.1.1</p><p>Any traffic coming from the inside host <strong>10.0.1.2</strong> will have its source address translated to <strong>203.0.1.1</strong> when it exits R1.</p><p>To generate traffic and trigger the translation, a <strong>ping was sent from R2</strong>.</p><p><em>(Ping from R2 before and after translation)</em><br>
+<img src="images\Engineering-Network-Address-Translation-Static-Dynamic-and-PAT\static-nat-before-after-ping.png" alt=""></p><p>If you try the same command on R3 which does not have a static nat rule in place it will fail.</p><p><img src="images\Engineering-Network-Address-Translation-Static-Dynamic-and-PAT\static-nat-r3-fail-ping.png" alt=""></p><p>Once traffic flows through R1, the NAT table can be inspected using:</p><p><code>show ip nat translations</code></p><p><em>(NAT Translation Table)</em><br>
+<img src="images\Engineering-Network-Address-Translation-Static-Dynamic-and-PAT\static-nat-show-ip-nat-translations.png" alt=""></p><p>The output shows the static mapping between the <strong>Inside Local</strong> and <strong>Inside Global</strong> addresses,</p><h2 id="Configuring-Dynamic-NAT">Configuring Dynamic NAT</h2><p>Next we will configure <strong>Dynamic NAT</strong> on <strong>R4</strong>. Unlike Static NAT, which creates a permanent mapping, Dynamic NAT uses a <strong>pool of public addresses</strong>. When inside hosts generate traffic, the router assigns an available address from the pool and creates a temporary translation.</p><p>First, define the <strong>inside and outside NAT interfaces</strong>.</p><pre><code>enable
+conf t
+
+int range g0/0 - 1
+ip nat outside
+
+int range g0/2 - 4
+ip nat inside
+</code></pre><p>Next, create an <strong>ACL to match the inside addresses</strong> that should be translated.</p><p><code>access-list 10 permit 10.0.0.0 0.255.255.255</code></p><p>Then define a <strong>public NAT pool</strong>.<br>
+<code>ip nat pool PUBLIC_POOL 210.0.0.0 210.0.0.255 netmask 255.255.255.0</code><br>
+Finally, tie the ACL and the pool together with the NAT rule.<br>
+<code>ip nat inside source list 10 pool PUBLIC_POOL</code></p><p>When inside hosts generate traffic, R4 will assign an available address from the <strong>PUBLIC_POOL</strong> and create a translation entry.</p><p>Traffic was generated using <strong>pings from inside routers</strong>.</p><p>These pings will <strong>not succeed</strong> in this lab because there are no return routes for the translated public addresses. However, the important part is that the router <strong>still creates the NAT translations</strong>, which can be verified with:</p><p><code>show ip nat translations</code></p><p><em>(Dynamic NAT Translation Table)</em><br>
+<img src="images\Engineering-Network-Address-Translation-Static-Dynamic-and-PAT\dynamic-nat-show-ip-nat-translations.png" alt=""></p><p>Even though the traffic does not fully complete the round trip, the router still performs the translation. In a real network where return routes exist, this traffic would work normally.</p><h2 id="Configuring-NAT-Overload-PAT">Configuring NAT Overload (PAT)</h2><p>Next we configure <strong>NAT Overload (PAT)</strong> on <strong>R10</strong>. PAT allows multiple internal hosts to share a single public IP address by translating source ports when necessary.</p><p>First, define the <strong>inside</strong> and <strong>outside</strong> NAT interfaces.</p><pre><code>enable
+conf t
+
+int range g0/0 - 1
+ip nat outside
+
+int range g0/2 - 3
+ip nat inside
+</code></pre><p>Next, create an ACL to match the internal traffic that should be translated.<br>
+<code>access-list 10 permit 10.0.0.0 0.0.255.255</code></p><p>Now apply NAT overload using the public addresses on R10’s outside interfaces.</p><pre><code>ip nat inside source list 10 interface g0/0 overload
+ip nat inside source list 10 interface g0/1 overload
+</code></pre><p>With this configuration, inside hosts that match <strong>ACL 10</strong> will be translated using the IP address of either <strong>g0/0 or g0/1</strong>, with the router using <strong>port translation</strong> to keep each session unique.</p><p>After generating traffic from inside routers, the NAT table can be inspected with:</p><p><code>show ip nat translations</code></p><p><em>(PAT Translation Table)</em><br>
+<img src="images\Engineering-Network-Address-Translation-Static-Dynamic-and-PAT\PAT-show-ip-nat-translations.png" alt=""></p><p>You should see translation entries that include <strong>port numbers</strong>, which is how the router tracks multiple internal connections using the same public IP address.</p><h2 id="NAT-Translation-Table-Analysis">NAT Translation Table Analysis</h2><p>After generating traffic through the NAT router, we can inspect how the router is tracking translations using:</p><p><code>show ip nat translations</code></p><p>This command displays the <strong>NAT translation table</strong>, which shows how the router is mapping internal addresses to external ones.</p><p>A typical output includes the following fields:</p><ul>
+<li><strong>Inside Local</strong> – The private IP address of the internal host.</li>
+<li><strong>Inside Global</strong> – The public IP address representing that host to external networks.</li>
+<li><strong>Outside Local</strong> – The address of the external host as it appears from inside the network.</li>
+<li><strong>Outside Global</strong> – The real public address of the external host.</li>
+</ul><p>Example concept:</p><p>Protocol | Inside Local | Inside Global | Outside Local | Outside Global<br>
+ICMP | 10.0.1.2 | 203.0.1.1 | 8.8.8.8 | 8.8.8.8</p><p>This output shows that the internal host <strong>10.0.1.2</strong> is being translated to the public address <strong>203.0.1.1</strong> when communicating with the external host <strong>8.8.8.8</strong>.</p><p>When <strong>PAT</strong> is being used, you will also see <strong>port numbers</strong> included in the translation entries. These ports allow the router to uniquely identify multiple sessions that share the same public IP address.</p><p>Example PAT concept:</p><p>Protocol | Inside Local | Inside Global<br>
+TCP | 10.0.1.2:5000 | 203.0.1.1:30001<br>
+TCP | 10.0.1.3:5000 | 203.0.1.1:30002</p><p>Here both internal hosts share the same public IP, but the router differentiates their sessions using translated port numbers.</p><p>The NAT translation table is one of the most important tools when troubleshooting NAT. It allows you to quickly see whether translations are being created and how the router is modifying packet headers as traffic passes through the device.</p><h2 id="NAT-Timeout-Behavior">NAT Timeout Behavior</h2><p>NAT translations are <strong>not permanent</strong> for most types of traffic. The router keeps entries in the NAT table only while they are active. If a session becomes idle for too long, the router removes the translation to free up resources.</p><p>Different protocols have different default timeout values because they behave differently on the network.</p><p>Typical Cisco default timers are:</p><ul>
+<li><strong>TCP</strong> – 24 hours (86400 seconds)</li>
+<li><strong>UDP</strong> – 5 minutes (300 seconds)</li>
+<li><strong>ICMP</strong> – 60 seconds</li>
+</ul><p>TCP sessions tend to remain active longer because they are <strong>stateful connections</strong>, while UDP and ICMP traffic are usually short-lived. Because of this, their NAT entries expire much faster.</p><p>You can observe this behavior by generating traffic and checking the NAT table:</p><p><code>show ip nat translations</code></p><p>After traffic stops, the translation will remain in the table until the timeout expires. Once the timer runs out, the router removes the entry and the NAT slot becomes available for new translations.</p><p>These timers help ensure the NAT table does not grow indefinitely while still keeping active sessions working properly.</p><h2 id="NAT-Verification-Commands">NAT Verification Commands</h2><p>Here’s a quick reference for the main commands used to verify NAT, along with what they show:</p><ul>
+<li>
+<p><code>show ip nat translations</code> – Displays the current NAT table with mappings between Inside Local, Inside Global, and Outside addresses. For PAT, also shows port numbers.</p>
+</li>
+<li>
+<p><code>show ip nat statistics</code> – Shows NAT activity summary, including number of active translations, hits and misses, NAT pool usage, and which interfaces are configured as inside or outside.</p>
+</li>
+<li>
+<p><code>show running-config | section nat</code> – Shows NAT configuration in the running config, including ACLs, NAT rules, and interface assignments.</p>
+</li>
+<li>
+<p><code>debug ip nat</code> – Provides real-time NAT activity for troubleshooting. Use carefully on production devices because it can be verbose.</p>
+</li>
+</ul><p>These commands together allow you to quickly verify that NAT is configured correctly, translations are being created, and traffic is flowing as expected.</p><h2 id="Conclusion">Conclusion</h2><p>In this lab we configured and analyzed several common forms of <strong>Network Address Translation</strong> used in real networks. This included <strong>Static NAT</strong>, <strong>Dynamic NAT</strong>, and <strong>NAT Overload (PAT)</strong>, along with examining how the router tracks translations in the NAT table.</p><p>By generating traffic and inspecting the translation table, we were able to see how the router maps <strong>Inside Local addresses to Inside Global addresses</strong> and how PAT uses <strong>port numbers</strong> to allow multiple hosts to share a single public IP.</p><p>We also looked at how translations behave over time through <strong>NAT timeout values</strong>, and how to verify NAT operation using commands like <code>show ip nat translations</code> and <code>show ip nat statistics</code>.</p><p>Understanding how NAT works at this level makes troubleshooting much easier. Instead of just knowing the configuration commands, you can see how the router is actually <strong>building, maintaining, and removing translations</strong> as traffic flows through the device.</p></div>
+</section>
+    </main>
+    <footer>
+        <p>Author: Holden Weber</p>
+    </footer>            
+
+  <script src="myscripts.js"></script>
+</body>
+</html>
