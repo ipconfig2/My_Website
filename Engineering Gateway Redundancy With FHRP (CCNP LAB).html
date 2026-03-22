@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering Gateway Redundancy With FHRP</title>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="Blog_Post.css">
+  <!-- Social Embed -->
+<meta property="og:title" content="Holden Weber – IT Blog">
+<meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+<meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+<meta property="og:url" content="https://holdenweber.com/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+
+</head>
+<body>
+  <div id="mySidenav" class="sidenav">
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="Holden_Weber_Resume.html">Resume</a>
+  </div>
+
+  <span onclick="openNav()">
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </span>
+<body>
+<header>
+    <h1>Engineering Gateway Redundancy With FHRP</h1>
+  </header>
+  <main>
+    <section>
+
+<div id="doc" class="markdown-body container-fluid"><h1 id="Engineering-Gateway-Redundancy-With-FHRP-CCNP-LAB"></h1><h2 id="Introduction">Introduction</h2><p>In most networks, the default gateway is a <strong>single point of failure</strong>. If that gateway goes down, end hosts lose connectivity even if the rest of the network is fully operational.</p><p>First Hop Redundancy Protocols (FHRPs) solve this problem by providing <strong>gateway high availability</strong>. They allow multiple routers to present a single virtual default gateway to hosts, ensuring seamless failover if one device or path fails.</p><p>In this lab, we’ll take a hands-on approach to FHRPs by configuring and testing:</p><ul>
+<li><strong>HSRP</strong> for active/standby redundancy and VLAN-based load balancing</li>
+<li><strong>VRRP</strong> as an open-standard alternative with built-in preemption</li>
+<li><strong>GLBP</strong> for true active/active load balancing using virtual MAC addresses</li>
+</ul><p>The focus isn’t just configuration we’ll validate real world behavior like failover, tracking, and upstream failure detection to ensure redundancy actually works in practice.</p><h2 id="Topology-amp-Base-Configuration">Topology &amp; Base Configuration</h2><p>All routers have a loopback address applied that matches their router name.<br>
+For Example R1 = 1.1.1.1/32</p><p>Interface IPs follow a consistent pattern: x.x.x.(Device Number). For example, on subnet 10.0.0.0/24 between R2 and R8, R2 uses 10.0.0.2/24 and R8 uses 10.0.0.8/24.</p><p><img src="images\Engineering-Gateway-Redundancy-With-FHRP\Diagram.png" alt=""></p><p>All Subnets, ROAS, Vlans, and IGP Routing has been pre-configured.</p><h2 id="HSRP-Configuration-with-Load-Balancing">HSRP Configuration with Load Balancing</h2><p>In this lab, HSRP is used not just for redundancy, but also for <strong>basic load balancing</strong> by splitting traffic across multiple VLANs.</p><p>The idea is simple:</p><ul>
+<li>Each VLAN has its own HSRP group</li>
+<li>A different router is Active for each VLAN</li>
+<li>This allows both routers to actively forward traffic instead of one sitting idle</li>
+</ul><hr><h3 id="Configuration-Overview">Configuration Overview</h3><ul>
+<li>Configure HSRP on both routers in LAN 1</li>
+<li>Set:
+<ul>
+<li>Virtual IP (default gateway for hosts in both VLANs)</li>
+<li>Separate HSRP groups per VLAN</li>
+<li>VLAN 10 → <strong>R2 Active</strong></li>
+<li>VLAN 20 → <strong>R3 Active</strong></li>
+<li>Preemption (with delay to prevent flapping)</li>
+<li>Priority to control Active router election</li>
+</ul>
+</li>
+</ul><hr><h3 id="R2-Configuration">R2 Configuration</h3><pre><code>interface g0/1.10
+standby 10 ip 10.10.1.1
+standby 10 priority 101
+standby 10 preempt delay minimum 10
+
+interface g0/1.20
+standby 20 ip 10.20.1.1
+standby 20 preempt delay minimum 10
+</code></pre><hr><h3 id="R3-Configuration">R3 Configuration</h3><pre><code>interface g0/1.10
+standby 10 ip 10.10.1.1
+standby 10 preempt delay minimum 10
+
+interface g0/1.20
+standby 20 ip 10.20.1.1
+standby 20 priority 101
+standby 20 preempt delay minimum 10
+</code></pre><hr><h3 id="What-This-Achieves">What This Achieves</h3><ul>
+<li><strong>VLAN 10 traffic</strong> is primarily handled by R2</li>
+<li><strong>VLAN 20 traffic</strong> is primarily handled by R3</li>
+<li>Both routers are actively forwarding traffic → better resource utilization</li>
+</ul><h3 id="Verification">Verification</h3><p>Check HSRP status on both routers:</p><p><code>show standby brief</code></p><p>You should see:</p><ul>
+<li>
+<p>R2 as <strong>Active</strong> for VLAN 10 (Group 10)<br>
+<img src="images\Engineering-Gateway-Redundancy-With-FHRP\HSRP-show-standby-brief-R2.png" alt=""></p>
+</li>
+<li>
+<p>R3 as <strong>Active</strong> for VLAN 20 (Group 20)<br>
+<img src="images\Engineering-Gateway-Redundancy-With-FHRP\HSRP-show-standby-brief-R3.png" alt=""></p>
+</li>
+</ul><hr><h3 id="Real-World-Insight">Real-World Insight</h3><p>This is the most common way to achieve load balancing with HSRP in production.<br>
+Instead of relying on more complex protocols like GLBP, networks often use <strong>multiple HSRP groups + VLAN design</strong> to keep things simple and predictable.</p><h2 id="Failover-Testing-HSRP">Failover Testing (HSRP)</h2><p>Validate that HSRP failover works as expected by simulating a failure.</p><hr><h3 id="Test-Scenario">Test Scenario</h3><p>Shut down the Active router interface:</p><pre><code>interface g0/1.10
+shutdown
+</code></pre><p><img src="images\Engineering-Gateway-Redundancy-With-FHRP\R2-shutdown.png" alt=""></p><hr><h3 id="Verify">Verify</h3><ul>
+<li>Standby router becomes <strong>Active</strong></li>
+<li>Virtual IP and MAC move over</li>
+<li>Hosts maintain connectivity (minimal packet loss)</li>
+</ul><p>Check:</p><p><code>show standby brief</code></p><p><img src="images\Engineering-Gateway-Redundancy-With-FHRP\R3-afterR2-shutdown.png" alt=""></p><hr><h3 id="Test-Preemption">Test Preemption</h3><p>Bring the interface back up:</p><pre><code>interface g0/1.10
+no shutdown
+
+</code></pre><ul>
+<li>Higher priority router should reclaim <strong>Active</strong> role (after delay)<br>
+<img src="images\Engineering-Gateway-Redundancy-With-FHRP\HSRP-show-standby-brief-R3.png" alt=""></li>
+</ul><hr><h2 id="Interface-Tracking">Interface Tracking</h2><p>Interface tracking allows HSRP to fail over when a <strong>critical link (like a WAN uplink)</strong> goes down even if the router itself is still up.</p><hr><h3 id="Configuration-Example-R2">Configuration Example R2</h3><pre><code>track 1 interface g0/0 line-protocol
+interface g0/1.10
+standby 10 track 1 decrement 20
+
+
+</code></pre><ul>
+<li>Tracks interface <strong>g0/0</strong> (WAN link)</li>
+<li>Decrements HSRP priority by <strong>20</strong> if it goes down</li>
+</ul><hr><h3 id="Test-Scenario1">Test Scenario</h3><p>Simulate WAN failure:</p><pre><code>interface g0/0
+shutdown
+</code></pre><hr><h3 id="Verify1">Verify</h3><ul>
+<li>HSRP priority is reduced</li>
+<li>Standby router takes over as <strong>Active</strong></li>
+<li>Traffic shifts to the backup path</li>
+</ul><p>Check:</p><p><code>show standby brief</code></p><p><img src="images\Engineering-Gateway-Redundancy-With-FHRP\show-standby-brief-R2-track-int.png" alt=""></p><hr><h3 id="What-This-Solves">What This Solves</h3><p>Prevents <strong>black hole routing</strong> where:</p><ul>
+<li>Router is still up</li>
+<li>But interface is down</li>
+</ul><hr><h3 id="Real-World-Insight1">Real-World Insight</h3><p>Without tracking, HSRP won’t fail over during upstream failures only full device/interface failures. Tracking is what makes redundancy actually work in production.</p><h2 id="IP-SLA-Tracking">IP SLA Tracking</h2><p>IP SLA tracking allows HSRP to fail over based on <strong>upstream reachability</strong>, not just interface state.</p><hr><h3 id="Configuration-Example">Configuration Example</h3><pre><code>ip sla 1
+icmp-echo 8.8.8.8
+frequency 5
+ip sla schedule 1 life forever start-time now
+
+track 2 ip sla 1 reachability
+
+interface g0/1.10
+standby 10 track 2 decrement 20
+</code></pre><ul>
+<li>Sends ICMP probes to verify upstream connectivity</li>
+<li>Links SLA to a tracking object</li>
+<li>Decrements HSRP priority if reachability fails</li>
+</ul><hr><h3 id="Test-Scenario2">Test Scenario</h3><p>Simulate upstream failure:</p><ul>
+<li>Block ICMP or remove upstream route</li>
+</ul><hr><h3 id="Verify2">Verify</h3><ul>
+<li>Track object goes down</li>
+<li>HSRP priority decreases</li>
+<li>Standby router becomes <strong>Active</strong></li>
+</ul><p>Check:</p><pre><code>show track
+show standby brief
+</code></pre><p><img src="images\Engineering-Gateway-Redundancy-With-FHRP\show-track-R2-icmp.png" alt=""><br>
+<img src="images\Engineering-Gateway-Redundancy-With-FHRP\show -standby-brief-icmp.png" alt=""></p><hr><h3 id="What-This-Solves1">What This Solves</h3><p>Detects failures <strong>beyond the local router</strong>, preventing traffic from being sent to a dead upstream path.</p><hr><h3 id="Real-World-Insight2">Real-World Insight</h3><p>Interface tracking only sees link state. IP SLA sees <strong>actual reachability</strong> this is what you use in real networks to avoid silent failures.</p><h2 id="VRRP-Configuration">VRRP Configuration</h2><p>Configure VRRP on both routers 4 &amp; 5 (no VLANs, single subnet).</p><hr><h3 id="Configuration-Example1">Configuration Example</h3><p>R4 (higher priority → Master):</p><pre><code>interface g0/1
+vrrp 10 ip 10.0.2.1
+vrrp 10 priority 110
+</code></pre><p>R5:</p><pre><code>interface g0/1
+vrrp 10 ip 10.0.2.1
+</code></pre><hr><h3 id="Verify3">Verify</h3><ul>
+<li>R4 = <strong>Master</strong>, R5 = <strong>Backup</strong></li>
+<li>Virtual IP is reachable as default gateway</li>
+</ul><p>Check:</p><p><code>show vrrp brief</code></p><p><img src="images\Engineering-Gateway-Redundancy-With-FHRP\R4-show-vrrp-brief.png" alt=""><br>
+<img src="images\Engineering-Gateway-Redundancy-With-FHRP\R5-show-vrrp-brief.png" alt=""></p><hr><h3 id="Preemption-Behavior">Preemption Behavior</h3><ul>
+<li>Enabled by default in VRRP</li>
+<li>Higher priority router will automatically take back <strong>Master</strong> role when it returns</li>
+</ul><hr><h2 id="GLBP-Configuration">GLBP Configuration</h2><p>Configure GLBP on both routers to provide <strong>gateway redundancy + load balancing</strong>.</p><hr><h3 id="Configuration-Example2">Configuration Example</h3><p>R6:</p><pre><code>interface g0/1
+glbp 10 ip 10.0.3.1
+glbp 10 priority 110
+glbp 10 preempt
+</code></pre><p>R7:</p><pre><code>interface g0/1
+glbp 10 ip 10.0.3.1
+glbp 10 preempt
+</code></pre><hr><h3 id="Verify4">Verify</h3><ul>
+<li>One router = <strong>AVG (Active Virtual Gateway)</strong></li>
+<li>Both routers can be <strong>AVFs (Active Virtual Forwarders)</strong></li>
+<li>Multiple virtual MAC addresses are assigned</li>
+</ul><p>Check:</p><p><code>show glbp brief</code></p><p><img src="images\Engineering-Gateway-Redundancy-With-FHRP\r6-show-glbp-brief.png" alt=""><br>
+<img src="images\Engineering-Gateway-Redundancy-With-FHRP\r7-show-glbp-brief.png" alt=""></p><hr><p>This command gives you a quick overview of:</p><ul>
+<li>GLBP group number</li>
+<li>Virtual IP address</li>
+<li>Role of each router (AVG or AVF)</li>
+<li>Forwarder state</li>
+</ul><hr><h3 id="How-to-Identify-Roles">How to Identify Roles</h3><ul>
+<li>
+<p><strong>AVG (Active Virtual Gateway)</strong></p>
+<ul>
+<li>The router responsible for answering ARP requests for the virtual IP</li>
+<li>Assigns different virtual MAC addresses to hosts</li>
+<li>Only <strong>one AVG per group</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>AVF (Active Virtual Forwarder)</strong></p>
+<ul>
+<li>Routers that actually forward traffic for a given virtual MAC</li>
+<li>There can be <strong>multiple AVFs</strong> (this is what enables load balancing)</li>
+</ul>
+</li>
+</ul><hr><h3 id="What-to-Look-For-in-Output">What to Look For in Output</h3><ul>
+<li>One router listed as <strong>Active</strong> → this is your <strong>AVG</strong></li>
+<li>Multiple forwarders in <strong>Active</strong> state → these are your <strong>AVFs</strong></li>
+<li>Each forwarder has a <strong>unique virtual MAC address</strong></li>
+</ul><hr><h3 id="Test-Load-Balancing">Test Load Balancing</h3><ul>
+<li>Ping or generate traffic from multiple hosts</li>
+<li>Each host should receive a <strong>different virtual MAC</strong></li>
+<li>Traffic is distributed across both routers<br>
+<img src="images\Engineering-Gateway-Redundancy-With-FHRP\vpc-glbp-1.png" alt=""><br>
+<img src="images\Engineering-Gateway-Redundancy-With-FHRP\vpc-glbp-2.png" alt=""></li>
+</ul><hr><h3 id="Understanding-GLBP-VMACs">Understanding GLBP VMACs</h3><p>GLBP assigns <strong>multiple virtual MAC addresses (VMACs)</strong> to a single virtual IP address. This is what enables load balancing.</p><ul>
+<li>Each <strong>AVF (Active Virtual Forwarder)</strong> owns a unique VMAC</li>
+<li>The <strong>AVG</strong> responds to ARP requests and hands out different VMACs to different hosts</li>
+<li>Hosts all use the <em>same default gateway IP</em>, but forward traffic to <strong>different MAC addresses</strong></li>
+</ul><hr><h3 id="Real-World-Insight3">Real-World Insight</h3><p>GLBP gives you <strong>active/active gateway usage</strong>, unlike HSRP/VRRP which are active/standby by default</p><h2 id="Conclusion">Conclusion</h2><p>First Hop Redundancy Protocols (FHRPs) are a critical part of building resilient networks, ensuring that the default gateway is always available even during failures.</p><p>In this lab, you configured and tested:</p><ul>
+<li><strong>HSRP</strong> for active/standby redundancy with load balancing via multiple groups</li>
+<li><strong>VRRP</strong> as an open-standard alternative with built-in preemption</li>
+<li><strong>GLBP</strong> for true active/active load balancing using virtual MAC addresses</li>
+</ul><p>You also validated real-world behaviors like:</p><ul>
+<li>Failover during interface and upstream failures</li>
+<li>Priority-based elections and preemption</li>
+<li>Interface tracking and IP SLA for intelligent failover</li>
+<li>Load balancing using GLBP VMAC distribution</li>
+</ul></div>
+
+</section>
+    </main>
+    <footer>
+        <p>Authors: Holden Weber</p>
+    </footer>            
+
+  <script src="myscripts.js"></script>
+</body>
+</html>

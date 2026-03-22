@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FHRP Under the Hood (CCNP Notes)</title>
+  <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+  <link rel="stylesheet" href="Blog_Post.css">
+  <!-- Social Embed -->
+<meta property="og:title" content="Holden Weber – IT Blog">
+<meta property="og:description" content="Networking, Linux, automation, and home lab writeups.">
+<meta property="og:image" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+<meta property="og:url" content="https://holdenweber.com/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="https://graphicalnetworks.com/wp-content/uploads/2018/06/logical-network-diagram-example.png">
+
+</head>
+<body>
+  <div id="mySidenav" class="sidenav">
+    <a href="index.html">Home</a>
+    <a href="Blog.html">Blog</a>
+    <a href="about.html">About Me</a>
+    <a href="Holden_Weber_Resume.html">Resume</a>
+  </div>
+
+  <span onclick="openNav()">
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </span>
+<body>
+<header>
+    <h1>FHRP Under the Hood (CCNP Notes)</h1>
+  </header>
+  <main>
+    <section>
+
+<div id="doc" class="markdown-body container-fluid"><h1 id="FHRP-Under-the-Hood-CCNP-Notes"></h1><h2 id="What-Problem-FHRPs-Solve">What Problem FHRPs Solve</h2><p>In a typical network, hosts are configured with a single default gateway usually the IP address of a router interface on their subnet. The issue is that this creates a <strong>single point of failure</strong>. If that router goes down, users lose access to anything outside their local network, even if other routers are available.</p><p>Hosts also don’t have any built in mechanism to dynamically switch to a different gateway. They will continue sending traffic to the same IP address, which means a failed gateway results in a complete loss of upstream connectivity.</p><p>First Hop Redundancy Protocols (FHRPs) solve this by introducing a <strong>virtual default gateway</strong> that multiple routers share. Instead of pointing to a physical router, hosts use a <strong>virtual IP address (VIP)</strong>.</p><p>Behind the scenes:</p><ul>
+<li>One router actively forwards traffic (active/master)</li>
+<li>Another router remains on standby (backup)</li>
+</ul><p>FHRPs also use a <strong>virtual MAC address</strong>, so when a failover occurs, the new active router assumes the same IP and MAC. From the host’s perspective, nothing changes, and traffic continues flowing with minimal disruption.</p><h2 id="FHRP-Comparison-Overview">FHRP Comparison Overview</h2><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>HSRP</th>
+<th>VRRP</th>
+<th>GLBP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Type</td>
+<td>Cisco Proprietary</td>
+<td>Open Standard (RFC)</td>
+<td>Cisco Proprietary</td>
+</tr>
+<tr>
+<td>Primary Use</td>
+<td>Redundancy</td>
+<td>Redundancy</td>
+<td>Redundancy + Load Balancing</td>
+</tr>
+<tr>
+<td>Roles</td>
+<td>Active / Standby</td>
+<td>Master / Backup</td>
+<td>AVG (Gateway) / AVF (Forwarders)</td>
+</tr>
+<tr>
+<td>Load Balancing</td>
+<td>Manual (multiple groups)</td>
+<td>Manual (multiple groups)</td>
+<td>Built-in (per-host load balancing)</td>
+</tr>
+<tr>
+<td>Preemption Default</td>
+<td>Disabled</td>
+<td>Enabled</td>
+<td>Disabled</td>
+</tr>
+<tr>
+<td>Election Method</td>
+<td>Priority (default 100) + IP tie</td>
+<td>Priority (default 100/255 owner)</td>
+<td>Priority (AVG election)</td>
+</tr>
+<tr>
+<td>Virtual IP</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Virtual MAC</td>
+<td>Yes (0000.0c07.acXX)</td>
+<td>Yes (0000.5e00.01XX)</td>
+<td>Yes (multiple MACs per forwarder)</td>
+</tr>
+<tr>
+<td>Convergence Speed</td>
+<td>Moderate</td>
+<td>Faster</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>Low</td>
+<td>Low</td>
+<td>Higher</td>
+</tr>
+<tr>
+<td>Best Use Case</td>
+<td>Simple redundancy (Cisco env)</td>
+<td>Multi-vendor environments</td>
+<td>Need redundancy + load balancing</td>
+</tr>
+</tbody>
+</table><h3 id="Quick-Takeaways">Quick Takeaways</h3><ul>
+<li><strong>HSRP</strong>: Most common in Cisco networks, simple and reliable</li>
+<li><strong>VRRP</strong>: Preferred in multi-vendor environments</li>
+<li><strong>GLBP</strong>: Useful when you want load balancing without manual tuning</li>
+</ul><h2 id="HSRP-Hot-Standby-Router-Protocol">HSRP (Hot Standby Router Protocol)</h2><p>HSRP is a <strong>Cisco proprietary FHRP</strong> used to provide default gateway redundancy. It allows multiple routers to present a single <strong>virtual IP address (VIP)</strong> to hosts, ensuring continuous connectivity if one router fails.</p><h3 id="How-It-Works">How It Works</h3><ul>
+<li>One router is elected as <strong>Active</strong> (forwards traffic)</li>
+<li>One router is <strong>Standby</strong> (takes over if Active fails)</li>
+<li>Other routers remain in a <strong>Listen</strong> state</li>
+<li>Routers share a <strong>virtual IP and virtual MAC address</strong></li>
+<li>Hosts use the VIP as their default gateway</li>
+</ul><h3 id="HSRP-Groups">HSRP Groups</h3><ul>
+<li>HSRP operates using <strong>group numbers</strong></li>
+<li>Each group represents a separate virtual gateway</li>
+<li>Default group is <strong>0</strong>, but typically you’ll use custom groups (e.g., 10, 20)</li>
+<li>You can run <strong>multiple HSRP groups per VLAN</strong> for load balancing
+<ul>
+<li>Example: VLAN 10 uses Group 10 (Router A active)</li>
+<li>VLAN 20 uses Group 20 (Router B active)</li>
+</ul>
+</li>
+</ul><h3 id="Election-Process">Election Process</h3><ul>
+<li>Based on <strong>priority</strong> (default: 100)</li>
+<li>Highest priority becomes Active</li>
+<li>Tie-breaker: <strong>highest IP address</strong></li>
+<li>The Standby router is the next highest priority</li>
+</ul><h3 id="HSRP-States">HSRP States</h3><p>HSRP routers move through several states during operation:</p><ul>
+<li>
+<p><strong>Disabled</strong><br>
+Interface is not participating in HSRP</p>
+</li>
+<li>
+<p><strong>Init (Idle)</strong><br>
+HSRP is enabled, but not fully initialized yet</p>
+</li>
+<li>
+<p><strong>Listen</strong><br>
+Receives HSRP messages but is not participating in elections</p>
+</li>
+<li>
+<p><strong>Learn</strong><br>
+Learns the virtual IP from another router (if not manually configured)</p>
+</li>
+<li>
+<p><strong>Speak</strong><br>
+Actively participates in elections and sends hello messages</p>
+</li>
+<li>
+<p><strong>Standby</strong><br>
+Backup router, ready to take over if Active fails</p>
+</li>
+<li>
+<p><strong>Active</strong><br>
+Currently forwarding traffic for the virtual IP</p>
+</li>
+</ul><h3 id="Key-Features">Key Features</h3><h4 id="Preemption">Preemption</h4><ul>
+<li>Disabled by default</li>
+<li>When enabled, a higher priority router can take back the Active role</li>
+<li>Recommended in most production environments (with delay)</li>
+</ul><h4 id="Interface-Tracking">Interface Tracking</h4><ul>
+<li>Monitors interface state (ex: WAN link)</li>
+<li>If the tracked interface goes down:
+<ul>
+<li>HSRP priority is reduced</li>
+<li>Another router can take over as Active</li>
+</ul>
+</li>
+</ul><h4 id="Object-Tracking-IP-SLA">Object Tracking (IP SLA)</h4><ul>
+<li>Tracks reachability (not just interface status)</li>
+<li>Example: track upstream connectivity instead of just link state</li>
+<li>Prevents black hole routing</li>
+</ul><h3 id="Timers">Timers</h3><ul>
+<li>Hello timer: <strong>3 seconds</strong> (default)</li>
+<li>Hold timer: <strong>10 seconds</strong> (default)</li>
+<li>Can be tuned for faster failover</li>
+</ul><h3 id="Virtual-MAC-Format">Virtual MAC Format</h3><ul>
+<li><code>0000.0c07.acXX</code></li>
+<li><code>XX</code> = HSRP group number (in hex)</li>
+</ul><h3 id="Failure-Behavior">Failure Behavior</h3><ul>
+<li>If the Active router fails:
+<ul>
+<li>Standby takes over the VIP and virtual MAC</li>
+<li>Traffic continues with minimal disruption</li>
+</ul>
+</li>
+<li>If tracking is configured:
+<ul>
+<li>Failover can occur even if the router itself is still up</li>
+</ul>
+</li>
+</ul><h3 id="Key-Takeaways">Key Takeaways</h3><ul>
+<li>HSRP is simple and widely used in Cisco environments</li>
+<li>Multiple groups enable basic load balancing</li>
+<li>Preemption and tracking are critical for real-world deployments</li>
+<li>Without tracking, you risk <strong>black hole routing</strong></li>
+</ul><h2 id="VRRP-Virtual-Router-Redundancy-Protocol">VRRP (Virtual Router Redundancy Protocol)</h2><p>VRRP is an <strong>open standard FHRP</strong> (RFC-based) that provides default gateway redundancy similar to HSRP. It allows multiple routers to share a <strong>virtual IP address (VIP)</strong>, ensuring continuous connectivity if the primary router fails.</p><h3 id="How-It-Works1">How It Works</h3><ul>
+<li>One router is elected as the <strong>Master</strong> (forwards traffic)</li>
+<li>Other routers act as <strong>Backup</strong></li>
+<li>Routers share a <strong>virtual IP and virtual MAC address</strong></li>
+<li>Hosts use the VIP as their default gateway</li>
+</ul><h3 id="Key-Difference-from-HSRP">Key Difference from HSRP</h3><ul>
+<li>The <strong>Master router typically owns the real IP address</strong> of the VIP</li>
+<li><strong>Preemption is enabled by default</strong></li>
+<li>Faster and simpler failover behavior</li>
+</ul><hr><h3 id="VRRP-Groups">VRRP Groups</h3><ul>
+<li>VRRP uses <strong>Virtual Router IDs (VRIDs)</strong> instead of group numbers</li>
+<li>Each VRID represents a virtual gateway</li>
+<li>Range: <strong>1–255</strong></li>
+<li>Multiple VRRP groups can be used for load balancing across VLANs</li>
+</ul><hr><h3 id="Election-Process1">Election Process</h3><ul>
+<li>Based on <strong>priority</strong>:
+<ul>
+<li>Default: <strong>100</strong></li>
+<li>Highest priority becomes Master</li>
+</ul>
+</li>
+<li>Special case:
+<ul>
+<li>Router with the <strong>actual IP matching the VIP</strong> gets priority <strong>255</strong> (always wins)</li>
+</ul>
+</li>
+<li>Tie-breaker: <strong>highest IP address</strong></li>
+</ul><hr><h3 id="VRRP-States">VRRP States</h3><ul>
+<li>
+<p><strong>Initialize</strong><br>
+VRRP is starting up and not yet participating</p>
+</li>
+<li>
+<p><strong>Master</strong><br>
+Actively forwarding traffic for the VIP</p>
+</li>
+<li>
+<p><strong>Backup</strong><br>
+Waiting to take over if Master fails</p>
+</li>
+</ul><hr><h3 id="Timers1">Timers</h3><ul>
+<li>Advertisement interval: <strong>1 second (default)</strong></li>
+<li>Master down interval is calculated based on timers and priority</li>
+<li>Typically results in <strong>faster failover than HSRP</strong></li>
+</ul><hr><h3 id="Virtual-MAC-Format1">Virtual MAC Format</h3><ul>
+<li><code>0000.5e00.01XX</code></li>
+<li><code>XX</code> = VRID (in hex)</li>
+</ul><hr><h3 id="Failure-Behavior1">Failure Behavior</h3><ul>
+<li>
+<p>If the Master router fails:</p>
+<ul>
+<li>A Backup router takes over as Master</li>
+<li>Assumes the VIP and virtual MAC</li>
+<li>Minimal disruption to traffic</li>
+</ul>
+</li>
+<li>
+<p>Because preemption is enabled:</p>
+<ul>
+<li>A higher priority router will automatically reclaim Master when it returns</li>
+</ul>
+</li>
+</ul><hr><h3 id="Key-Takeaways1">Key Takeaways</h3><ul>
+<li>VRRP is the <strong>preferred choice in multi-vendor environments</strong></li>
+<li>Simpler than HSRP with fewer states</li>
+<li>Preemption is on by default (be aware in production)</li>
+<li>Typically offers <strong>faster and more predictable failover</strong></li>
+</ul><h2 id="GLBP-Gateway-Load-Balancing-Protocol">GLBP (Gateway Load Balancing Protocol)</h2><p>GLBP is a <strong>Cisco proprietary FHRP</strong> that provides both <strong>default gateway redundancy and load balancing</strong>. Unlike HSRP and VRRP, which rely on a single active router, GLBP allows multiple routers to actively forward traffic at the same time.</p><h3 id="How-It-Works2">How It Works</h3><ul>
+<li>Routers share a <strong>virtual IP address (VIP)</strong></li>
+<li>One router is elected as the <strong>AVG (Active Virtual Gateway)</strong></li>
+<li>Other routers become <strong>AVFs (Active Virtual Forwarders)</strong></li>
+<li>The AVG assigns different <strong>virtual MAC addresses</strong> to each AVF</li>
+<li>Hosts receive different MAC addresses via ARP → traffic is distributed across routers</li>
+</ul><hr><h3 id="GLBP-Roles">GLBP Roles</h3><ul>
+<li>
+<p><strong>AVG (Active Virtual Gateway)</strong></p>
+<ul>
+<li>Handles ARP requests for the VIP</li>
+<li>Assigns virtual MACs to clients</li>
+<li>Controls load balancing decisions</li>
+</ul>
+</li>
+<li>
+<p><strong>AVF (Active Virtual Forwarder)</strong></p>
+<ul>
+<li>Actually forwards traffic for assigned hosts</li>
+<li>Each AVF owns a unique virtual MAC</li>
+</ul>
+</li>
+</ul><hr><h3 id="Load-Balancing-Methods">Load Balancing Methods</h3><ul>
+<li>
+<p><strong>Round-Robin (default)</strong></p>
+<ul>
+<li>Cycles through available AVFs for each ARP request</li>
+</ul>
+</li>
+<li>
+<p><strong>Weighted</strong></p>
+<ul>
+<li>Traffic distribution based on router capacity</li>
+</ul>
+</li>
+<li>
+<p><strong>Host-Dependent</strong></p>
+<ul>
+<li>A host always gets the same AVF (consistent path)</li>
+</ul>
+</li>
+</ul><hr><h3 id="Election-Process2">Election Process</h3><ul>
+<li>Based on <strong>priority</strong> (default: 100)</li>
+<li>Highest priority becomes <strong>AVG</strong></li>
+<li>Tie-breaker: <strong>highest IP address</strong></li>
+<li>AVFs are assigned from remaining routers</li>
+</ul><hr><h3 id="GLBP-States">GLBP States</h3><p>GLBP routers move through similar states as HSRP:</p><ul>
+<li>
+<p><strong>Disabled</strong><br>
+Not participating in GLBP</p>
+</li>
+<li>
+<p><strong>Init</strong><br>
+GLBP is initializing</p>
+</li>
+<li>
+<p><strong>Listen</strong><br>
+Not participating in elections yet</p>
+</li>
+<li>
+<p><strong>Speak</strong><br>
+Participating in elections</p>
+</li>
+<li>
+<p><strong>Standby</strong><br>
+Backup for the AVG</p>
+</li>
+<li>
+<p><strong>Active</strong><br>
+Acting as AVG or AVF</p>
+</li>
+</ul><hr><h3 id="Forwarder-Preemption">Forwarder Preemption</h3><ul>
+<li>Controls whether a router can reclaim its role as an AVF</li>
+<li>Disabled by default</li>
+<li>Useful in maintaining consistent load balancing behavior</li>
+</ul><hr><h3 id="Weighting-amp-Tracking">Weighting &amp; Tracking</h3><ul>
+<li>GLBP supports <strong>weight-based load balancing</strong></li>
+<li>Interfaces or objects can be tracked:
+<ul>
+<li>If a tracked object fails → weight decreases</li>
+<li>If weight drops below threshold → router stops forwarding traffic</li>
+</ul>
+</li>
+</ul><p>This helps prevent <strong>black hole routing</strong></p><hr><h3 id="Timers2">Timers</h3><ul>
+<li>Hello timer: <strong>3 seconds (default)</strong></li>
+<li>Hold timer: <strong>10 seconds (default)</strong></li>
+</ul><hr><h3 id="Virtual-MAC-Format2">Virtual MAC Format</h3><ul>
+<li><code>0007.b4XX.XXXX</code></li>
+<li>Multiple MAC addresses are used (one per AVF)</li>
+</ul><hr><h2 id="Failure-Behavior2">Failure Behavior</h2><ul>
+<li>
+<p>If an <strong>AVF fails</strong>:</p>
+<ul>
+<li>Another router takes over its virtual MAC</li>
+<li>Traffic for affected hosts is rerouted</li>
+</ul>
+</li>
+<li>
+<p>If the <strong>AVG fails</strong>:</p>
+<ul>
+<li>A standby router takes over ARP responsibilities</li>
+</ul>
+</li>
+<li>
+<p>Minimal disruption, but slightly more complex than HSRP/VRRP</p>
+</li>
+</ul><hr><h3 id="Key-Takeaways2">Key Takeaways</h3><ul>
+<li>GLBP provides <strong>true active/active gateway load balancing</strong></li>
+<li>More complex than HSRP/VRRP</li>
+<li>Useful when you want to utilize multiple routers without manual tuning</li>
+<li>Often avoided in favor of simpler designs unless load balancing is required</li>
+</ul><h2 id="FHRP-Design-Considerations">FHRP Design Considerations</h2><p>Designing with FHRPs isn’t just about adding redundancy it’s about making sure traffic flows efficiently during both normal operation and failure scenarios.</p><h3 id="Choose-the-Right-Protocol">Choose the Right Protocol</h3><ul>
+<li><strong>HSRP</strong>: Standard choice in Cisco environments</li>
+<li><strong>VRRP</strong>: Best for multi-vendor networks</li>
+<li><strong>GLBP</strong>: Use only if you truly need built-in load balancing</li>
+</ul><hr><h3 id="ActiveStandby-vs-Load-Balancing">Active/Standby vs Load Balancing</h3><ul>
+<li>HSRP/VRRP are <strong>active/standby by default</strong></li>
+<li>Load balancing is typically done by:
+<ul>
+<li>Using <strong>multiple VLANs</strong></li>
+<li>Assigning different routers as active per VLAN</li>
+</ul>
+</li>
+<li>GLBP provides automatic load balancing, but adds complexity</li>
+</ul><hr><h3 id="Align-FHRP-with-STP-Critical">Align FHRP with STP (Critical)</h3><ul>
+<li>The <strong>active gateway should also be the STP root bridge</strong></li>
+<li>Prevents suboptimal routing and unnecessary Layer 2 traffic</li>
+<li>Example:
+<ul>
+<li>Switch A = STP root + HSRP active for VLAN 10</li>
+<li>Switch B = STP root + HSRP active for VLAN 20</li>
+</ul>
+</li>
+</ul><hr><h3 id="Avoid-Black-Hole-Routing">Avoid Black Hole Routing</h3><ul>
+<li>A router can still be “up” but unable to forward traffic upstream</li>
+<li>Always use:
+<ul>
+<li><strong>Interface tracking</strong></li>
+<li><strong>IP SLA / object tracking</strong></li>
+</ul>
+</li>
+<li>Ensures failover happens when upstream connectivity is lost</li>
+</ul><hr><h3 id="Use-Preemption-with-Caution">Use Preemption (with Caution)</h3><ul>
+<li>Allows the preferred router to reclaim active role</li>
+<li>Recommended:
+<ul>
+<li>Enable preemption</li>
+<li>Add a <strong>delay</strong> to prevent flapping during boot</li>
+</ul>
+</li>
+</ul><hr><h3 id="VLAN-and-Gateway-Design">VLAN and Gateway Design</h3><ul>
+<li>Typically:
+<ul>
+<li>One FHRP group per VLAN</li>
+</ul>
+</li>
+<li>For load sharing:
+<ul>
+<li>Distribute active roles across VLANs</li>
+</ul>
+</li>
+<li>Keep gateway placement consistent and predictable</li>
+</ul><hr><h3 id="Failure-Domain-Awareness">Failure Domain Awareness</h3><ul>
+<li>FHRPs operate between <strong>independent devices</strong></li>
+<li>Unlike stacking:
+<ul>
+<li>No shared control plane</li>
+<li>Better fault isolation</li>
+</ul>
+</li>
+<li>Helps reduce impact of device-level failures</li>
+</ul><hr><h3 id="Keep-It-Simple">Keep It Simple</h3><ul>
+<li>Don’t overcomplicate designs unless needed</li>
+<li>Many networks work best with:
+<ul>
+<li>HSRP or VRRP</li>
+<li>Proper tracking</li>
+<li>Clean VLAN distribution</li>
+</ul>
+</li>
+</ul><hr><h3 id="Key-Takeaways3">Key Takeaways</h3><ul>
+<li>FHRP design is about <strong>traffic flow, not just redundancy</strong></li>
+<li>Always align with STP and upstream paths</li>
+<li>Tracking is critical to avoid silent failures</li>
+<li>Simpler designs are usually more stable and easier to troubleshoot</li>
+</ul><h2 id="Supervisor-amp-Route-Processor-Redundancy">Supervisor &amp; Route Processor Redundancy</h2><p>FHRPs protect against <strong>device failure</strong>, but what about failures <em>inside</em> the device?<br>
+That’s where <strong>Supervisor and Route Processor redundancy</strong> comes in.</p><p>In higher-end switches and routers, you can have multiple control planes:</p><ul>
+<li><strong>Supervisor engines (switches)</strong></li>
+<li><strong>Route processors (routers)</strong></li>
+</ul><p>These provide redundancy at the <strong>control plane level</strong>, allowing the device to stay operational even if a critical component fails.</p><hr><h3 id="Why-This-Matters">Why This Matters</h3><p>Without control plane redundancy:</p><ul>
+<li>If the supervisor or route processor crashes → the whole device reloads</li>
+<li>FHRP failover is triggered → network convergence event</li>
+</ul><p>With redundancy:</p><ul>
+<li>Failover happens <strong>within the device</strong></li>
+<li>Traffic disruption is minimized or avoided entirely</li>
+<li>FHRP may not need to fail over at all</li>
+</ul><hr><h3 id="Key-Concepts">Key Concepts</h3><h4 id="Stateful-Switchover-SSO">Stateful Switchover (SSO)</h4><ul>
+<li>Maintains synchronization between active and standby supervisors</li>
+<li>When the active fails:
+<ul>
+<li>Standby takes over <strong>without resetting interfaces</strong></li>
+</ul>
+</li>
+<li>Control plane switchover is nearly seamless</li>
+</ul><hr><h4 id="Nonstop-Forwarding-NSF">Nonstop Forwarding (NSF)</h4><ul>
+<li>Works with routing protocols (OSPF, EIGRP, BGP)</li>
+<li>During a control plane failure:
+<ul>
+<li>The <strong>data plane keeps forwarding traffic</strong></li>
+<li>Routing neighbors are preserved temporarily</li>
+</ul>
+</li>
+</ul><hr><h4 id="Route-Processor-Redundancy">Route Processor Redundancy</h4><ul>
+<li>Seen in routers with dual RPs</li>
+<li>One RP is active, the other is standby</li>
+<li>State information is synced between them</li>
+</ul><hr><h3 id="Interaction-with-FHRPs">Interaction with FHRPs</h3><ul>
+<li>Prevents unnecessary FHRP failover events</li>
+<li>The device remains the active gateway even during internal failure</li>
+<li>Improves overall network stability</li>
+</ul><p>Example:</p><ul>
+<li>Without SSO:
+<ul>
+<li>Supervisor crash → HSRP failover → traffic shift</li>
+</ul>
+</li>
+<li>With SSO:
+<ul>
+<li>Supervisor crash → standby takes over → <strong>no HSRP failover</strong></li>
+</ul>
+</li>
+</ul><hr><h3 id="Design-Considerations">Design Considerations</h3><ul>
+<li>Common in:
+<ul>
+<li>Core switches</li>
+<li>Distribution layer in large networks</li>
+</ul>
+</li>
+<li>Adds cost and complexity, but increases uptime</li>
+<li>Requires proper configuration and testing</li>
+</ul><hr><h3 id="Key-Takeaways4">Key Takeaways</h3><ul>
+<li>FHRPs protect against <strong>device loss</strong></li>
+<li>Supervisor/RP redundancy protects against <strong>internal failures</strong></li>
+<li>Technologies like <strong>SSO and NSF</strong> keep traffic flowing during control plane events</li>
+<li>Together, they provide a more resilient and stable network design</li>
+</ul><h2 id="Conclusion">Conclusion</h2><p>FHRPs are one of those things that seem simple at first, but they have a big impact on how stable and predictable your network actually is.</p><p>At a basic level, they solve the default gateway problem by removing a single point of failure. But in real networks, it goes deeper than that. How you design and tune FHRPs directly affects traffic flow, failover behavior, and how your network reacts under failure conditions.</p><p>HSRP and VRRP give you solid, predictable redundancy. GLBP adds load balancing, but with added complexity that isn’t always worth it. In most environments, a well designed HSRP or VRRP setup with proper tracking and VLAN distribution gets the job done cleanly.</p><p>The biggest takeaway is that <strong>redundancy alone isn’t enough</strong>. You need to think about:</p><ul>
+<li>Where traffic flows during normal operation</li>
+<li>What happens when upstream links fail</li>
+<li>How fast and clean failover actually is</li>
+</ul><p>On top of that, technologies like <strong>SSO and NSF</strong> take things further by preventing unnecessary failovers altogether, keeping traffic moving even during internal device issues.</p><p>At the end of the day, good FHRP design isn’t about memorizing commands it’s about building a network that <strong>fails predictably, recovers quickly, and avoids breaking in the first place</strong>.</p></div>
+</section>
+    </main>
+    <footer>
+        <p>Authors: Holden Weber</p>
+    </footer>            
+
+  <script src="myscripts.js"></script>
+</body>
+</html>
